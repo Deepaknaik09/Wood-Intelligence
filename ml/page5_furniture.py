@@ -33,6 +33,121 @@ def on_modal_dismiss():
 @st.dialog("Timber Recommendations & Joinery Engineering Studio", width="large", on_dismiss=on_modal_dismiss)
 def render_recommendations_modal(furniture_id: str):
     """Opens a focused, full-width modal studio for the selected piece, avoiding scrolling to page bottom."""
+    st.markdown("""<style>
+    /* Force Dialog Backdrop & Modal Box to match theme variables */
+    div[data-testid="stDialog"],
+    .stDialog {
+      background-color: rgba(0, 0, 0, 0.78) !important;
+      backdrop-filter: blur(5px) !important;
+    }
+    div[data-testid="stDialog"] > div,
+    div.stDialog > div,
+    div[data-testid="stDialog"] [class*="ep9mgll"],
+    div[role="dialog"],
+    section[role="dialog"],
+    div[data-testid="stDialog"] [data-testid="stVerticalBlock"] {
+      background-color: var(--surface) !important;
+      color: var(--ink) !important;
+    }
+    div[data-testid="stDialog"] > div,
+    div.stDialog > div {
+      border: 1.5px solid var(--line) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65) !important;
+    }
+    /* Dialog Main Title */
+    div[data-testid="stDialog"] h1,
+    div[data-testid="stDialog"] h2,
+    div[data-testid="stDialog"] h3,
+    div[data-testid="stDialog"] [data-testid="stHeadingWithActionElements"] *,
+    div[role="dialog"] h2,
+    div[role="dialog"] h3 {
+      color: var(--ink) !important;
+      font-family: 'Cormorant Garamond', Georgia, serif !important;
+      font-weight: 800 !important;
+    }
+    /* Dialog Close Button (X) */
+    div[data-testid="stDialog"] button[aria-label="Close"],
+    div[data-testid="stDialog"] button[aria-label="Close"] svg,
+    div.stDialog button[aria-label="Close"],
+    div.stDialog button[aria-label="Close"] svg {
+      color: var(--ink) !important;
+      fill: var(--ink) !important;
+      stroke: var(--ink) !important;
+    }
+    /* Top Furniture Dossier Card - Rich Dark Walnut with High Contrast in BOTH Modes */
+    .wi-furniture-dossier,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier,
+    div.wi-furniture-dossier {
+      background: linear-gradient(135deg, #1f1107 0%, #341b0d 100%) !important;
+      border: 1.5px solid #5a3518 !important;
+      border-radius: 8px !important;
+      padding: 1.25rem 1.45rem !important;
+      color: #f7eee1 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    }
+    .wi-furniture-dossier .dossier-title,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-title {
+      color: #ffd166 !important;
+      font-family: 'Cormorant Garamond', Georgia, serif !important;
+      font-size: 1.6rem !important;
+      font-weight: 800 !important;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85) !important;
+    }
+    .wi-furniture-dossier .dossier-chip,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-chip {
+      background: rgba(255, 209, 102, 0.18) !important;
+      border: 1.5px solid #ffd166 !important;
+      color: #ffd166 !important;
+      font-weight: 800 !important;
+      font-size: 0.75rem !important;
+    }
+    .wi-furniture-dossier .dossier-tagline,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-tagline {
+      color: #fcd34d !important;
+      font-size: 0.92rem !important;
+      font-weight: 700 !important;
+    }
+    .wi-furniture-dossier .dossier-desc,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-desc,
+    .wi-furniture-dossier p {
+      color: #f7eee1 !important;
+      font-size: 0.85rem !important;
+      line-height: 1.55 !important;
+      opacity: 0.95 !important;
+    }
+    /* Tabs inside Dialog */
+    div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] {
+      background: transparent !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] p {
+      color: var(--muted) !important;
+      font-weight: 600 !important;
+      font-size: 0.88rem !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+      border-bottom: 2.5px solid var(--amber) !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p {
+      color: var(--amber) !important;
+      font-weight: 800 !important;
+    }
+    /* Headings, text and labels inside dialog */
+    div[data-testid="stDialog"] h4 {
+      color: var(--ink) !important;
+      font-weight: 800 !important;
+    }
+    div[data-testid="stDialog"] p,
+    div[data-testid="stDialog"] span,
+    div[data-testid="stDialog"] label {
+      color: var(--ink) !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stCheckbox"] label p,
+    div[data-testid="stDialog"] label[data-baseweb="checkbox"] p {
+      color: var(--ink) !important;
+      font-weight: 700 !important;
+    }
+    </style>""", unsafe_allow_html=True)
     active_item = furniture_recommender.get_furniture_item(furniture_id)
 
     # -----------------------------------------------------------------------
@@ -209,9 +324,9 @@ def render_recommendations_modal(furniture_id: str):
               </div>
 
               <!-- Engineering Trade-offs -->
-              <div style="font-size:0.8rem;color:var(--muted);background:var(--amber-soft);border:1px solid var(--amber);border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.65rem;">
-                <strong style="color:var(--on-amber);">Engineering Considerations &amp; Trade-offs:</strong>
-                <div style="margin-top:0.15rem;color:var(--on-amber);">{" • ".join(tradeoffs)}</div>
+              <div style="font-size:0.8rem;background:var(--amber-soft);border:1px solid var(--amber);border-radius:8px;padding:0.55rem 0.85rem;margin-bottom:0.65rem;">
+                <strong style="color:var(--amber);">Engineering Considerations &amp; Trade-offs:</strong>
+                <div style="margin-top:0.18rem;color:var(--ink);line-height:1.45;">{" • ".join(tradeoffs)}</div>
               </div>
             </div>
             """), unsafe_allow_html=True)
@@ -600,43 +715,65 @@ def render_furniture_page(dark: bool = False):
     }
 
     /* Modal Dialog styling */
-    div[role="dialog"], [data-testid="stDialog"] {
-      background: var(--surface) !important;
+    div[data-testid="stDialog"],
+    .stDialog {
+      background-color: rgba(0, 0, 0, 0.78) !important;
+      backdrop-filter: blur(5px) !important;
+    }
+    div[data-testid="stDialog"] > div,
+    div.stDialog > div,
+    div[data-testid="stDialog"] [class*="ep9mgll"],
+    div[role="dialog"],
+    section[role="dialog"],
+    div[data-testid="stDialog"] [data-testid="stVerticalBlock"] {
+      background-color: var(--surface) !important;
       color: var(--ink) !important;
+    }
+    div[data-testid="stDialog"] > div,
+    div.stDialog > div {
       border: 1.5px solid var(--line) !important;
-      border-radius: 18px !important;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.65) !important;
     }
 
     /* Furniture Dossier Card Text Contrast Enforcement */
     .wi-furniture-dossier,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier,
+    div.wi-furniture-dossier {
+      background: linear-gradient(135deg, #1f1107 0%, #341b0d 100%) !important;
+      border: 1.5px solid #5a3518 !important;
+      border-radius: 8px !important;
+      padding: 1.25rem 1.45rem !important;
+      color: #f7eee1 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    }
     .wi-furniture-dossier * {
       box-sizing: border-box !important;
     }
-    .wi-furniture-dossier span.dossier-title,
-    [data-testid="stMarkdownContainer"] .wi-furniture-dossier span.dossier-title {
+    .wi-furniture-dossier .dossier-title,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-title {
       color: #ffd166 !important;
       font-family: 'Cormorant Garamond', Georgia, serif !important;
-      font-size: 1.55rem !important;
+      font-size: 1.6rem !important;
       font-weight: 800 !important;
       text-shadow: 0 2px 10px rgba(0,0,0,0.85) !important;
     }
-    .wi-furniture-dossier span.dossier-chip,
-    [data-testid="stMarkdownContainer"] .wi-furniture-dossier span.dossier-chip {
+    .wi-furniture-dossier .dossier-chip,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-chip {
       color: #ffd166 !important;
-      background: rgba(217,143,43,0.25) !important;
-      border: 1px solid rgba(217,143,43,0.6) !important;
+      background: rgba(255, 209, 102, 0.18) !important;
+      border: 1.5px solid #ffd166 !important;
       font-size: 0.75rem !important;
-      font-weight: 700 !important;
+      font-weight: 800 !important;
     }
-    .wi-furniture-dossier div.dossier-tagline,
-    [data-testid="stMarkdownContainer"] .wi-furniture-dossier div.dossier-tagline {
+    .wi-furniture-dossier .dossier-tagline,
+    [data-testid="stMarkdownContainer"] .wi-furniture-dossier .dossier-tagline {
       color: #fcd34d !important;
       font-size: 0.92rem !important;
       font-weight: 700 !important;
       line-height: 1.45 !important;
     }
-    .wi-furniture-dossier p.dossier-desc,
+    .wi-furniture-dossier .dossier-desc,
     .wi-furniture-dossier p,
     [data-testid="stMarkdownContainer"] .wi-furniture-dossier p {
       color: #f7eee1 !important;

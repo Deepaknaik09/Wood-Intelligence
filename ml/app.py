@@ -1129,9 +1129,9 @@ if dark:
     --line: #4a3220;
     --ink: #f3e3c8;
     --muted: #c9b392;
-    --amber: #d98f2b;
+    --amber: #ffd166;
     --amber-soft: #4a3414;
-    --on-amber: #1a1008;
+    --on-amber: #140c06;
     --good: #6fbf73;
     --warn: #e0a43a;
     --bad: #e0705f;
@@ -1472,9 +1472,68 @@ li[role="option"]:hover p, li[role="option"][aria-selected="true"] p {{
   background: var(--surface) !important;
   border: 1px solid var(--line) !important;
   color: var(--ink) !important;
-  border-radius: 14px !important;
+  border-radius: 8px !important;
   padding: 0.85rem !important;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4) !important;
+}}
+
+/* Modal Dialog Backdrop & Window (@st.dialog) */
+div[data-testid="stDialog"],
+.stDialog {{
+  background-color: rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: blur(5px) !important;
+}}
+
+div[data-testid="stDialog"] > div,
+div.stDialog > div,
+div[data-testid="stDialog"] [class*="ep9mgll"],
+div[role="dialog"],
+section[role="dialog"],
+div[data-testid="stDialog"] [data-testid="stVerticalBlock"] {{
+  background-color: var(--surface) !important;
+  color: var(--ink) !important;
+}}
+
+div[data-testid="stDialog"] > div,
+div.stDialog > div {{
+  border: 1.5px solid var(--line) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65) !important;
+}}
+
+div[data-testid="stDialog"] h1,
+div[data-testid="stDialog"] h2,
+div[data-testid="stDialog"] h3,
+div[data-testid="stDialog"] h4,
+div[data-testid="stDialog"] [data-testid="stHeadingWithActionElements"] * {{
+  color: var(--ink) !important;
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+  font-weight: 800 !important;
+}}
+
+div[data-testid="stDialog"] button[aria-label="Close"],
+div[data-testid="stDialog"] button[aria-label="Close"] svg {{
+  color: var(--ink) !important;
+  fill: var(--ink) !important;
+  stroke: var(--ink) !important;
+}}
+
+div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] {{
+  background: transparent !important;
+}}
+
+div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] p {{
+  color: var(--muted) !important;
+  font-weight: 600 !important;
+}}
+
+div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {{
+  border-bottom: 2.5px solid var(--amber) !important;
+}}
+
+div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p {{
+  color: var(--amber) !important;
+  font-weight: 800 !important;
 }}
 
 [data-testid="stFileUploader"] {{

@@ -1,5 +1,19 @@
 [
   {
+    "timestamp": "2026-11-17 14:01:22",
+    "filename": "images (2).jpg",
+    "wood_score": 0.896,
+    "is_wood": true,
+    "damaged_pct": 0.41,
+    "usable_pct": 98.94,
+    "waste_pct": 1.06,
+    "severity": "Medium",
+    "defect_count": 2,
+    "best_furniture": "Shelf",
+    "best_score": 90,
+    "species": "Norway spruce (Picea abies)"
+  },
+  {
     "timestamp": "2026-11-17 12:49:24",
     "filename": "1000_F_446386710_fQsGQPCGxed9ctgPvsUKSGyH9CxiOfuy.jpg",
     "wood_score": 0.932,
