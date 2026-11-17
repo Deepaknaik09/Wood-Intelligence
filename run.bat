@@ -10,10 +10,7 @@ echo  (Species Classification, Defect Segmentation, Joinery Studio)
 echo ===============================================================
 echo.
 
-:: Automatically open browser directly to localhost:8501
-start http://localhost:8501
-
-:: Start Streamlit server
+:: Start Streamlit server (Streamlit automatically opens the browser once ready)
 venv\Scripts\python.exe -m streamlit run ml\app.py --server.port 8501
 
 pause
