@@ -1,0 +1,31 @@
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Large Datasets (>10 GB raw training data)
+datasets/
+*.zip
+*.tar
+*.tar.gz
+
+# Inference local temporary test outputs
+ml/outputs/*
+!ml/outputs/.gitkeep
+
+# System & OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

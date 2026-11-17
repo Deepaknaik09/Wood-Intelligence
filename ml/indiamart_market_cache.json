@@ -1,0 +1,192 @@
+{
+  "mangalore": {
+    "city_slug": "mangalore",
+    "city_name": "Mangalore",
+    "url": "https://dir.indiamart.com/mangalore/wood.html",
+    "arrival_date": "12/11/2026",
+    "modal_cft": 1350.0,
+    "median_cft": 1800.0,
+    "city_index_ratio": 1.2,
+    "listings": [
+      {
+        "title": "A Grade Wild Jack Wood",
+        "price_display": "₹ 2,100/Cubic Feet",
+        "price_num": 2100.0,
+        "unit": "cu.ft",
+        "supplier": "K Abdulla & Co",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/wild-jack-wood-26587482930.html"
+      },
+      {
+        "title": "Boat Building Wood",
+        "price_display": "₹ 1,000/Cubic Feet",
+        "price_num": 1000.0,
+        "unit": "cu.ft",
+        "supplier": "Tropical Wood",
+        "city": "Mangalore",
+        "url": "https://dir.indiamart.com/mangalore/wood.html"
+      },
+      {
+        "title": "Bilwar",
+        "price_display": "₹ 1,500/Cubic Feet",
+        "price_num": 1500.0,
+        "unit": "cu.ft",
+        "supplier": "Supriya Wood Industries",
+        "city": "Mangalore",
+        "url": "https://dir.indiamart.com/mangalore/wood.html"
+      },
+      {
+        "title": "Brown Round Benin Teak Logs",
+        "price_display": "₹ 3,500/Cubic Feet",
+        "price_num": 3500.0,
+        "unit": "cu.ft",
+        "supplier": "Sun City Corporation",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/benin-teak-logs-2852423497288.html"
+      },
+      {
+        "title": "Acacia Wood Log",
+        "price_display": "₹ 690/Cubic Feet",
+        "price_num": 690.0,
+        "unit": "cu.ft",
+        "supplier": "Bombay Saw Mills",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/acacia-wood-log-2859750379455.html"
+      },
+      {
+        "title": "6mm Neem Wood",
+        "price_display": "₹ 32/sq ft",
+        "price_num": 32.0,
+        "unit": "sq.ft",
+        "supplier": "Nuha Traders",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/6mm-neem-wood-19310646630.html"
+      },
+      {
+        "title": "Firewood",
+        "price_display": "₹ 6/Kg",
+        "price_num": 6.0,
+        "unit": "kg",
+        "supplier": "Sri Lakshminarayana Wood Industries",
+        "city": "Mangalore",
+        "url": "https://dir.indiamart.com/mangalore/wood.html"
+      },
+      {
+        "title": "Brown Teak Wood Log",
+        "price_display": "₹ 3,500/Cubic Feet",
+        "price_num": 3500.0,
+        "unit": "cu.ft",
+        "supplier": "Hameed Wood Industries",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/brown-teak-wood-log-25325106091.html"
+      },
+      {
+        "title": "Exterior Rectangular Brown Sal Wood Door, For Home",
+        "price_display": "₹ 125/Square Feet",
+        "price_num": 125.0,
+        "unit": "sq.ft",
+        "supplier": "Axon Doors",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/rectangular-brown-sal-wood-door-27381392391.html"
+      },
+      {
+        "title": "Brown Biomass Pellets, Thickness: 8 mm",
+        "price_display": "₹ 17/Kg",
+        "price_num": 17.0,
+        "unit": "kg",
+        "supplier": "Shalini Thermal Energy Products",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/biomass-pellets-2852659585748.html"
+      },
+      {
+        "title": "Mysore Sandalwood Piece",
+        "price_display": "₹ 750/Kg",
+        "price_num": 750.0,
+        "unit": "kg",
+        "supplier": "Azeem Oud",
+        "city": "Mangalore",
+        "url": "https://dir.indiamart.com/mangalore/wood.html"
+      },
+      {
+        "title": "Hardwood 8MM Brown Biomass Pellets., For Wood Pellets",
+        "price_display": "₹ 8,000/Ton",
+        "price_num": 8000.0,
+        "unit": "tonne",
+        "supplier": "Mangalore Bio Fuel",
+        "city": "Mangalore",
+        "url": "https://www.indiamart.com/proddetail/8mm-brown-biomass-pellets-22985181191.html"
+      }
+    ],
+    "fetched_at": "2026-11-12 15:20:49",
+    "cached_at_epoch": 1794477048.5195558,
+    "source_status": "live"
+  },
+  "bangalore": {
+    "city_slug": "bangalore",
+    "city_name": "Bengaluru",
+    "url": "https://dir.indiamart.com/bangalore/wood.html",
+    "arrival_date": "12/11/2026",
+    "modal_cft": 550.0,
+    "median_cft": 950.0,
+    "city_index_ratio": 0.65,
+    "listings": [
+      {
+        "title": "Silver Woods",
+        "price_display": "₹ 550/Cubic Feet",
+        "price_num": 550.0,
+        "unit": "cu.ft",
+        "supplier": "Classic Traders",
+        "city": "Bengaluru",
+        "url": "https://www.indiamart.com/proddetail/silver-woods-2857226478448.html"
+      },
+      {
+        "title": "Multicolor Pine Wood Timbers, 19 Mm",
+        "price_display": "₹ 600/Cubic Feet",
+        "price_num": 600.0,
+        "unit": "cu.ft",
+        "supplier": "Rahi Imported Pine Woods",
+        "city": "Bengaluru",
+        "url": "https://www.indiamart.com/proddetail/pine-wood-timbers-14882865197.html"
+      },
+      {
+        "title": "White/off White/wood Grains. Packing Wood",
+        "price_display": "₹ 40/Kilogram",
+        "price_num": 40.0,
+        "unit": "unit",
+        "supplier": "Prestige Woods And Plywoods",
+        "city": "Bengaluru",
+        "url": "https://www.indiamart.com/proddetail/packing-wood-15991293533.html"
+      },
+      {
+        "title": "Cut Sizes Wood",
+        "price_display": "₹ 700/Square Feet",
+        "price_num": 700.0,
+        "unit": "sq.ft",
+        "supplier": "Daneswari Saw Mill",
+        "city": "Bengaluru",
+        "url": "https://dir.indiamart.com/bangalore/wood.html"
+      },
+      {
+        "title": "Timber Wood",
+        "price_display": "₹ 1,550/Cubic Feet",
+        "price_num": 1550.0,
+        "unit": "cu.ft",
+        "supplier": "Durga Enterprises",
+        "city": "Bengaluru",
+        "url": "https://dir.indiamart.com/bangalore/wood.html"
+      },
+      {
+        "title": "Yellow Or White Sal Wood",
+        "price_display": "₹ 1,300/Cubic Feet",
+        "price_num": 1300.0,
+        "unit": "cu.ft",
+        "supplier": "Prabhat Timber & Plywood",
+        "city": "Bengaluru",
+        "url": "https://www.indiamart.com/proddetail/yellow-or-white-sal-wood-10575890248.html"
+      }
+    ],
+    "fetched_at": "2026-11-12 11:42:47",
+    "cached_at_epoch": 1794463967.0961766,
+    "source_status": "live"
+  }
+}
