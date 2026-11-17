@@ -2113,28 +2113,28 @@ div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-baseweb="check
 }}
 
 /* Form inputs & controls */
-div[data-testid="stTextInput"] input {
+div[data-testid="stTextInput"] input {{
   background-color: var(--surface-2) !important;
   color: var(--ink) !important;
   border: 1.5px solid var(--line) !important;
   border-radius: 6px !important;
-}
-div[data-testid="stTextInput"] input:focus {
+}}
+div[data-testid="stTextInput"] input:focus {{
   border-color: var(--amber) !important;
   box-shadow: 0 0 0 1px var(--amber) !important;
-}
+}}
 div[data-testid="stTextInput"] label p,
-div[data-testid="stSelectbox"] label p {
+div[data-testid="stSelectbox"] label p {{
   color: var(--ink) !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
-}
-div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+}}
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {{
   background-color: var(--surface-2) !important;
   color: var(--ink) !important;
   border: 1.5px solid var(--line) !important;
   border-radius: 6px !important;
-}
+}}
 
 /* Prefers-reduced-motion: reduce (Requirement 6) */
 @media (prefers-reduced-motion: reduce) {{

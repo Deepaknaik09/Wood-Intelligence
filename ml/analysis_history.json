@@ -1,5 +1,21 @@
 [
   {
+    "timestamp": "2026-11-17 15:16:08",
+    "filename": "wood_species_sample_grid.png",
+    "wood_score": 0.298,
+    "is_wood": false,
+    "damaged_pct": 0.0,
+    "usable_pct": 100.0,
+    "waste_pct": 0.0,
+    "severity": "Low",
+    "defect_count": 0,
+    "best_furniture": "Chair",
+    "best_score": 77,
+    "species": "Unknown",
+    "inspector": "Guest Inspector",
+    "inspector_role": "General Access"
+  },
+  {
     "timestamp": "2026-11-17 14:01:22",
     "filename": "images (2).jpg",
     "wood_score": 0.896,
