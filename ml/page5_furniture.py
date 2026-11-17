@@ -41,6 +41,10 @@ def render_recommendations_modal(furniture_id: str):
     .stDialog {
       background-color: rgba(0, 0, 0, 0.82) !important;
       backdrop-filter: blur(6px) !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
     .react-aria-Modal,
     .react-aria-Dialog,
@@ -55,14 +59,44 @@ def render_recommendations_modal(furniture_id: str):
       background-color: var(--surface) !important;
       color: var(--ink) !important;
     }
-    .react-aria-Modal,
-    div[role="dialog"],
-    section[role="dialog"],
-    div[data-testid="stDialog"] > div,
-    div.stDialog > div {
+    /* Full-Screen Studio Modal Window */
+    div[data-testid="stDialog"] [class*="ep9mgll1"],
+    div[data-testid="stDialog"] .react-aria-Modal,
+    div[data-testid="stDialog"] div[role="dialog"],
+    div[data-testid="stDialog"] section[role="dialog"],
+    div[data-baseweb="modal"] [role="dialog"],
+    .stDialog [class*="ep9mgll1"],
+    .stDialog .react-aria-Modal,
+    .stDialog div[role="dialog"],
+    .react-aria-Modal {
+      width: 98vw !important;
+      max-width: 98vw !important;
+      min-width: 94vw !important;
+      height: 96vh !important;
+      max-height: 96vh !important;
+      min-height: 90vh !important;
+      margin: 1.5vh auto !important;
+      display: flex !important;
+      flex-direction: column !important;
       border: 1.5px solid var(--line) !important;
-      border-radius: 12px !important;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8) !important;
+      background-color: var(--surface) !important;
+      color: var(--ink) !important;
+      overflow: hidden !important;
+    }
+
+    div[data-testid="stDialog"] [class*="ep9mgll2"],
+    div[data-testid="stDialog"] .react-aria-Dialog,
+    div[data-testid="stDialog"] section[role="dialog"],
+    .stDialog [class*="ep9mgll2"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      flex: 1 1 auto !important;
+      overflow-y: auto !important;
+      padding: 1rem 1.8rem 2rem 1.8rem !important;
     }
     /* Dialog Main Title */
     .react-aria-Dialog h1,
@@ -703,25 +737,68 @@ def render_furniture_page(dark: bool = False):
     }
 
     /* Modal Dialog styling */
+    .react-aria-ModalOverlay,
     div[data-testid="stDialog"],
+    div[data-baseweb="modal"],
     .stDialog {
-      background-color: rgba(0, 0, 0, 0.78) !important;
-      backdrop-filter: blur(5px) !important;
+      background-color: rgba(0, 0, 0, 0.82) !important;
+      backdrop-filter: blur(6px) !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
-    div[data-testid="stDialog"] > div,
-    div.stDialog > div,
-    div[data-testid="stDialog"] [class*="ep9mgll"],
+    .react-aria-Modal,
+    .react-aria-Dialog,
     div[role="dialog"],
     section[role="dialog"],
-    div[data-testid="stDialog"] [data-testid="stVerticalBlock"] {
+    div[data-testid="stDialog"] > div,
+    div.stDialog > div,
+    div[data-testid="stDialog"] section,
+    div[data-testid="stDialog"] [class*="ep9mgll"],
+    div[data-testid="stDialog"] [data-testid="stVerticalBlock"],
+    div[data-baseweb="modal"] [role="dialog"] {
       background-color: var(--surface) !important;
       color: var(--ink) !important;
     }
-    div[data-testid="stDialog"] > div,
-    div.stDialog > div {
+    /* Full-Screen Studio Modal Window */
+    div[data-testid="stDialog"] [class*="ep9mgll1"],
+    div[data-testid="stDialog"] .react-aria-Modal,
+    div[data-testid="stDialog"] div[role="dialog"],
+    div[data-testid="stDialog"] section[role="dialog"],
+    div[data-baseweb="modal"] [role="dialog"],
+    .stDialog [class*="ep9mgll1"],
+    .stDialog .react-aria-Modal,
+    .stDialog div[role="dialog"],
+    .react-aria-Modal {
+      width: 98vw !important;
+      max-width: 98vw !important;
+      min-width: 94vw !important;
+      height: 96vh !important;
+      max-height: 96vh !important;
+      min-height: 90vh !important;
+      margin: 1.5vh auto !important;
+      display: flex !important;
+      flex-direction: column !important;
       border: 1.5px solid var(--line) !important;
-      border-radius: 12px !important;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.65) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8) !important;
+      background-color: var(--surface) !important;
+      color: var(--ink) !important;
+      overflow: hidden !important;
+    }
+
+    div[data-testid="stDialog"] [class*="ep9mgll2"],
+    div[data-testid="stDialog"] .react-aria-Dialog,
+    div[data-testid="stDialog"] section[role="dialog"],
+    .stDialog [class*="ep9mgll2"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      flex: 1 1 auto !important;
+      overflow-y: auto !important;
+      padding: 1rem 1.8rem 2rem 1.8rem !important;
     }
 
     /* Furniture Dossier Card Text Contrast Enforcement */
