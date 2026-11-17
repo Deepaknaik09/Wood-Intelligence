@@ -1477,30 +1477,43 @@ li[role="option"]:hover p, li[role="option"][aria-selected="true"] p {{
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4) !important;
 }}
 
-/* Modal Dialog Backdrop & Window (@st.dialog) */
+/* Modal Dialog Backdrop & Window (@st.dialog & React-Aria Streamlit 1.65+) */
+.react-aria-ModalOverlay,
 div[data-testid="stDialog"],
+div[data-baseweb="modal"],
 .stDialog {{
-  background-color: rgba(0, 0, 0, 0.78) !important;
-  backdrop-filter: blur(5px) !important;
+  background-color: rgba(0, 0, 0, 0.82) !important;
+  backdrop-filter: blur(6px) !important;
 }}
 
-div[data-testid="stDialog"] > div,
-div.stDialog > div,
-div[data-testid="stDialog"] [class*="ep9mgll"],
+.react-aria-Modal,
+.react-aria-Dialog,
 div[role="dialog"],
 section[role="dialog"],
-div[data-testid="stDialog"] [data-testid="stVerticalBlock"] {{
+div[data-testid="stDialog"] > div,
+div.stDialog > div,
+div[data-testid="stDialog"] section,
+div[data-testid="stDialog"] [class*="ep9mgll"],
+div[data-testid="stDialog"] [data-testid="stVerticalBlock"],
+div[data-baseweb="modal"] [role="dialog"] {{
   background-color: var(--surface) !important;
   color: var(--ink) !important;
 }}
 
+.react-aria-Modal,
+div[role="dialog"],
+section[role="dialog"],
 div[data-testid="stDialog"] > div,
 div.stDialog > div {{
   border: 1.5px solid var(--line) !important;
   border-radius: 12px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75) !important;
 }}
 
+.react-aria-Dialog h1,
+.react-aria-Dialog h2,
+.react-aria-Dialog h3,
+.react-aria-Dialog h4,
 div[data-testid="stDialog"] h1,
 div[data-testid="stDialog"] h2,
 div[data-testid="stDialog"] h3,
@@ -1511,29 +1524,58 @@ div[data-testid="stDialog"] [data-testid="stHeadingWithActionElements"] * {{
   font-weight: 800 !important;
 }}
 
+.react-aria-Dialog button[aria-label="Close"],
 div[data-testid="stDialog"] button[aria-label="Close"],
-div[data-testid="stDialog"] button[aria-label="Close"] svg {{
+div[data-testid="stDialog"] button[aria-label="Close"] svg,
+div.stDialog button[aria-label="Close"],
+div.stDialog button[aria-label="Close"] svg {{
   color: var(--ink) !important;
   fill: var(--ink) !important;
   stroke: var(--ink) !important;
 }}
 
+.react-aria-Dialog [data-testid="stTabs"] button[role="tab"],
 div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] {{
   background: transparent !important;
 }}
 
+.react-aria-Dialog [data-testid="stTabs"] button[role="tab"] p,
 div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] p {{
   color: var(--muted) !important;
   font-weight: 600 !important;
 }}
 
+.react-aria-Dialog [data-testid="stTabs"] button[role="tab"][aria-selected="true"],
 div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {{
   border-bottom: 2.5px solid var(--amber) !important;
 }}
 
+.react-aria-Dialog [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
 div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p {{
   color: var(--amber) !important;
   font-weight: 800 !important;
+}}
+
+.react-aria-Dialog p,
+.react-aria-Dialog span,
+.react-aria-Dialog label,
+div[data-testid="stDialog"] p,
+div[data-testid="stDialog"] span,
+div[data-testid="stDialog"] label {{
+  color: var(--ink) !important;
+}}
+
+.react-aria-Dialog [data-testid="stCheckbox"] label p,
+.react-aria-Dialog label[data-baseweb="checkbox"] p,
+div[data-testid="stDialog"] [data-testid="stCheckbox"] label p,
+div[data-testid="stDialog"] label[data-baseweb="checkbox"] p {{
+  color: var(--ink) !important;
+  font-weight: 700 !important;
+}}
+
+.react-aria-Dialog [data-baseweb="select"] *,
+div[data-testid="stDialog"] [data-baseweb="select"] * {{
+  color: var(--ink) !important;
 }}
 
 [data-testid="stFileUploader"] {{

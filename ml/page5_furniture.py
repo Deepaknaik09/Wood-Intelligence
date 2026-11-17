@@ -34,28 +34,40 @@ def on_modal_dismiss():
 def render_recommendations_modal(furniture_id: str):
     """Opens a focused, full-width modal studio for the selected piece, avoiding scrolling to page bottom."""
     st.markdown("""<style>
-    /* Force Dialog Backdrop & Modal Box to match theme variables */
+    /* Force Dialog Backdrop & Modal Box to match theme variables across React-Aria & Streamlit 1.65+ */
+    .react-aria-ModalOverlay,
     div[data-testid="stDialog"],
+    div[data-baseweb="modal"],
     .stDialog {
-      background-color: rgba(0, 0, 0, 0.78) !important;
-      backdrop-filter: blur(5px) !important;
+      background-color: rgba(0, 0, 0, 0.82) !important;
+      backdrop-filter: blur(6px) !important;
     }
-    div[data-testid="stDialog"] > div,
-    div.stDialog > div,
-    div[data-testid="stDialog"] [class*="ep9mgll"],
+    .react-aria-Modal,
+    .react-aria-Dialog,
     div[role="dialog"],
     section[role="dialog"],
-    div[data-testid="stDialog"] [data-testid="stVerticalBlock"] {
+    div[data-testid="stDialog"] > div,
+    div.stDialog > div,
+    div[data-testid="stDialog"] section,
+    div[data-testid="stDialog"] [class*="ep9mgll"],
+    div[data-testid="stDialog"] [data-testid="stVerticalBlock"],
+    div[data-baseweb="modal"] [role="dialog"] {
       background-color: var(--surface) !important;
       color: var(--ink) !important;
     }
+    .react-aria-Modal,
+    div[role="dialog"],
+    section[role="dialog"],
     div[data-testid="stDialog"] > div,
     div.stDialog > div {
       border: 1.5px solid var(--line) !important;
       border-radius: 12px !important;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75) !important;
     }
     /* Dialog Main Title */
+    .react-aria-Dialog h1,
+    .react-aria-Dialog h2,
+    .react-aria-Dialog h3,
     div[data-testid="stDialog"] h1,
     div[data-testid="stDialog"] h2,
     div[data-testid="stDialog"] h3,
@@ -67,6 +79,7 @@ def render_recommendations_modal(furniture_id: str):
       font-weight: 800 !important;
     }
     /* Dialog Close Button (X) */
+    .react-aria-Dialog button[aria-label="Close"],
     div[data-testid="stDialog"] button[aria-label="Close"],
     div[data-testid="stDialog"] button[aria-label="Close"] svg,
     div.stDialog button[aria-label="Close"],
@@ -117,35 +130,63 @@ def render_recommendations_modal(furniture_id: str):
       opacity: 0.95 !important;
     }
     /* Tabs inside Dialog */
+    .react-aria-Dialog [data-testid="stTabs"] button[role="tab"],
     div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] {
       background: transparent !important;
     }
+    .react-aria-Dialog [data-testid="stTabs"] button[role="tab"] p,
     div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"] p {
       color: var(--muted) !important;
       font-weight: 600 !important;
       font-size: 0.88rem !important;
     }
+    .react-aria-Dialog [data-testid="stTabs"] button[role="tab"][aria-selected="true"],
     div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
       border-bottom: 2.5px solid var(--amber) !important;
     }
+    .react-aria-Dialog [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
     div[data-testid="stDialog"] [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p {
       color: var(--amber) !important;
       font-weight: 800 !important;
     }
     /* Headings, text and labels inside dialog */
+    .react-aria-Dialog h4,
     div[data-testid="stDialog"] h4 {
       color: var(--ink) !important;
       font-weight: 800 !important;
     }
+    .react-aria-Dialog p,
+    .react-aria-Dialog span,
+    .react-aria-Dialog label,
     div[data-testid="stDialog"] p,
     div[data-testid="stDialog"] span,
     div[data-testid="stDialog"] label {
       color: var(--ink) !important;
     }
+    .react-aria-Dialog [data-testid="stCheckbox"] label p,
+    .react-aria-Dialog label[data-baseweb="checkbox"] p,
     div[data-testid="stDialog"] [data-testid="stCheckbox"] label p,
     div[data-testid="stDialog"] label[data-baseweb="checkbox"] p {
       color: var(--ink) !important;
       font-weight: 700 !important;
+    }
+    /* Selectboxes and dropdowns inside dialog */
+    .react-aria-Dialog [data-baseweb="select"] *,
+    div[data-testid="stDialog"] [data-baseweb="select"] * {
+      color: var(--ink) !important;
+    }
+    /* Engineering Trade-offs / Warning Box High-Contrast */
+    .tradeoffs-callout-box {
+      background: var(--amber-soft) !important;
+      border: 1.5px solid var(--amber) !important;
+      border-radius: 8px !important;
+      padding: 0.65rem 0.95rem !important;
+      color: var(--ink) !important;
+      font-size: 0.82rem !important;
+      line-height: 1.5 !important;
+    }
+    .tradeoffs-callout-box strong {
+      color: var(--amber) !important;
     }
     </style>""", unsafe_allow_html=True)
     active_item = furniture_recommender.get_furniture_item(furniture_id)
@@ -222,12 +263,11 @@ def render_recommendations_modal(furniture_id: str):
     if "compare_woods" not in st.session_state:
         st.session_state["compare_woods"] = []
 
-    # 5 Comprehensive Studio Tabs
-    tab_woods, tab_explorer, tab_compare, tab_designs, tab_rules = st.tabs([
+    # 4 Comprehensive Studio Tabs
+    tab_woods, tab_patterns, tab_compare, tab_rules = st.tabs([
         f"Top 5 Recommended Species ({active_item['name']})",
-        "Alternate Blueprints",
+        f"Design Patterns & Blueprints ({active_item['name']})",
         f"Comparative Analysis ({len(st.session_state['compare_woods'])})",
-        "Technical Joinery Blueprints",
         "Fabrication Guidelines"
     ])
 
@@ -324,7 +364,7 @@ def render_recommendations_modal(furniture_id: str):
               </div>
 
               <!-- Engineering Trade-offs -->
-              <div style="font-size:0.8rem;background:var(--amber-soft);border:1px solid var(--amber);border-radius:8px;padding:0.55rem 0.85rem;margin-bottom:0.65rem;">
+              <div class="tradeoffs-callout-box" style="margin-bottom:0.65rem;">
                 <strong style="color:var(--amber);">Engineering Considerations &amp; Trade-offs:</strong>
                 <div style="margin-top:0.18rem;color:var(--ink);line-height:1.45;">{" • ".join(tradeoffs)}</div>
               </div>
@@ -356,19 +396,19 @@ def render_recommendations_modal(furniture_id: str):
                     st.rerun()
 
     # -----------------------------------------------------------------------
-    # TAB 2: "OTHER DESIGNS YOU CAN ACHIEVE WITH THIS WOOD" (TWO-WAY EXPLORER)
+    # TAB 2: DEDICATED DESIGN PATTERNS FOR THIS FURNITURE PIECE
     # -----------------------------------------------------------------------
-    with tab_explorer:
+    with tab_patterns:
         explored_wood_id = st.session_state.get("selected_wood_for_explorer", top_5_woods[0]["wood"]["id"])
         explored_wood = scoring_engine.WOODS_BY_ID.get(explored_wood_id, top_5_woods[0]["wood"])
 
         exp_w_names = [w["name"] for w in scoring_engine.WOODS_DATABASE]
         exp_w_ids = [w["id"] for w in scoring_engine.WOODS_DATABASE]
         sel_w_name = st.selectbox(
-            "Select Timber to Explore Compatible Furniture Designs:",
+            f"Tailor Architectural Blueprints & Design Patterns for {active_item['name']} Using:",
             exp_w_names,
             index=exp_w_ids.index(explored_wood_id) if explored_wood_id in exp_w_ids else 0,
-            key="dlg_explorer_wood_select"
+            key="dlg_pattern_wood_select"
         )
         new_exp_id = exp_w_ids[exp_w_names.index(sel_w_name)]
         if new_exp_id != explored_wood_id:
@@ -379,76 +419,83 @@ def render_recommendations_modal(furniture_id: str):
         <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:8px;padding:1rem 1.3rem;margin:0.85rem 0;box-shadow:0 2px 8px rgba(217,143,43,0.08);">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.6rem;">
             <div>
-              <span style="font-size:0.72rem;color:var(--amber);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">TIMBER SUITABILITY MATRIX</span>
+              <span style="font-size:0.72rem;color:var(--amber);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">ACTIVE CRAFTING TIMBER PAIRING</span>
               <div style="font-size:1.35rem;font-weight:800;color:var(--ink);">{explored_wood['name']} <span style="font-size:0.9rem;font-weight:500;color:var(--muted);font-style:italic;">({explored_wood['scientificName']})</span></div>
             </div>
             <div style="text-align:right;">
               <span style="background:var(--amber);color:var(--on-amber);font-size:0.72rem;font-weight:800;padding:0.25rem 0.7rem;border-radius:4px;">
-                Density: {explored_wood['density']} kg/m³
+                Density: {explored_wood['density']} kg/m³ | Hardness: {explored_wood['hardness']} N
               </span>
             </div>
           </div>
           
           <div style="background:var(--surface);border-left:3px solid var(--good);border-radius:6px;padding:0.6rem 0.9rem;margin-top:0.7rem;font-size:0.82rem;color:var(--ink);line-height:1.5;">
-            <strong style="color:var(--good);">Joinery Specification:</strong><br/>
+            <strong style="color:var(--good);">Species Workability &amp; Joinery Specification:</strong><br/>
             {explored_wood['joineryTip']}
-          </div>
-
-          <div style="margin-top:0.55rem;font-size:0.8rem;color:var(--muted);">
-            <strong>Recommended Architectural Applications:</strong> {", ".join(explored_wood['bestUses'])}
           </div>
         </div>
         """), unsafe_allow_html=True)
 
         st.markdown(uhtml(f"""
-        <div style="margin:1rem 0 0.5rem 0;">
-          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;">Furniture Pieces Buildable With {explored_wood['name']} (Score ≥ 70)</h4>
+        <div style="margin:1rem 0 0.6rem 0;">
+          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;">Curated Design Patterns for {active_item['name']}</h4>
           <p style="font-size:0.82rem;color:var(--muted);margin:0;">
-            Click any mini-card to load its full engineering dossier, stress profile, and blueprints (two-way explorer).
+            Architectural joinery methods, finished proportions, structural safety margins, and workshop blueprints tailored exclusively for {active_item['name']} crafted in {explored_wood['name']}.
           </p>
         </div>
         """), unsafe_allow_html=True)
 
-        other_designs = scoring_engine.get_other_designs_for_wood(explored_wood_id, threshold=70.0, options=scoring_options)
+        furniture_patterns = furniture_recommender.get_furniture_design_patterns(active_item["id"], explored_wood_id)
 
-        if not other_designs:
-            st.info(f"No catalog pieces currently meet the 70% threshold for {explored_wood['name']} under current priority/environment settings.")
-        else:
-            for cat_name, cat_items in other_designs.items():
-                st.markdown(f'<div style="font-size:0.92rem;font-weight:700;color:var(--amber);margin:0.8rem 0 0.35rem 0;border-bottom:1px solid var(--line);padding-bottom:0.2rem;">{cat_name} ({len(cat_items)} Pieces)</div>', unsafe_allow_html=True)
-                
-                mini_cols = st.columns(min(len(cat_items), 4), gap="small")
-                for m_idx, entry in enumerate(cat_items):
-                    m_item = entry["item"]
-                    m_score = entry["score"]
-                    col_target = mini_cols[m_idx % len(mini_cols)]
-                    
-                    with col_target:
-                        is_current = (m_item["id"] == active_item["id"])
-                        border_st = "var(--amber)" if is_current else "var(--line)"
-                        bg_st = "var(--surface-2)" if is_current else "var(--surface)"
-                        
-                        st.markdown(uhtml(f'''
-                        <div style="background:{bg_st};border:1.5px solid {border_st};border-radius:12px;padding:8px;text-align:center;margin-bottom:6px;">
-                          <div style="font-weight:700;font-size:0.78rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                            {m_item['name']}
-                          </div>
-                          <div style="font-size:0.73rem;font-weight:800;color:var(--good);margin-bottom:4px;">
-                            {m_score:.1f}% Match
-                          </div>
-                        </div>
-                        '''), unsafe_allow_html=True)
-                        
-                        if os.path.exists(m_item["image"]):
-                            st.image(m_item["image"], use_container_width=True)
-                        else:
-                            st.markdown(f'<div style="font-size:2rem;text-align:center;">{m_item["icon"]}</div>', unsafe_allow_html=True)
-                            
-                        btn_txt = "✓ Active" if is_current else f"Switch to {m_item['name']}"
-                        if st.button(btn_txt, key=f"dlg_switch_{explored_wood_id}_{m_item['id']}", use_container_width=True, type="primary" if is_current else "secondary"):
-                            st.session_state["selected_furniture"] = m_item["id"]
-                            st.session_state["active_modal"] = m_item["id"]
-                            st.rerun()
+        for p_idx, pat in enumerate(furniture_patterns):
+            st.markdown(uhtml(f"""
+            <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1rem;box-shadow:0 3px 12px rgba(0,0,0,0.05);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.7rem;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                    <span style="font-size:1.25rem;font-weight:800;color:var(--ink);font-family:'Cinzel',serif;">{pat['title']}</span>
+                    <span style="background:var(--amber-soft);color:var(--ink);border:1px solid var(--amber);font-size:0.7rem;font-weight:700;padding:0.18rem 0.6rem;border-radius:4px;letter-spacing:0.04em;">{pat['badge']}</span>
+                  </div>
+                  <p style="font-size:0.84rem;color:var(--muted);margin:0.35rem 0 0 0;line-height:1.5;">
+                    {pat['description']}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Blueprint Specs Grid -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:0.65rem;margin:0.85rem 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0.8rem 0.95rem;">
+                <div>
+                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Finished Dimensions</div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['dimensions']}</div>
+                </div>
+                <div>
+                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Recommended Joinery</div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--good);margin-top:0.15rem;">{pat['recommended_joinery']}</div>
+                </div>
+                <div>
+                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Protective Finish</div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['recommended_finish']}</div>
+                </div>
+                <div>
+                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Design Load Capacity</div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['load_capacity']}</div>
+                </div>
+              </div>
+
+              <!-- Timber Pairing Suitability & Structural Margin -->
+              <div style="background:var(--surface-2);border-left:4px solid var(--good);padding:0.65rem 0.9rem;border-radius:0 6px 6px 0;margin-bottom:0.6rem;font-size:0.81rem;color:var(--ink);line-height:1.45;">
+                <strong style="color:var(--good);">Timber Engineering Analysis ({pat['wood_pairing_name']}):</strong><br/>
+                {pat['wood_pairing_note']}<br/>
+                <span style="font-size:0.77rem;color:var(--muted);">{pat['wood_stability_note']}</span>
+              </div>
+
+              <!-- Technical Workshop Blueprint -->
+              <div style="background:var(--amber-soft);border-left:4px solid var(--amber);padding:0.65rem 0.9rem;border-radius:0 6px 6px 0;font-size:0.81rem;color:var(--ink);line-height:1.45;">
+                <strong style="color:var(--amber);">Master Workshop Blueprint &amp; Fabrication Tip:</strong><br/>
+                {pat['blueprint_tips']}
+              </div>
+            </div>
+            """), unsafe_allow_html=True)
 
     # -----------------------------------------------------------------------
     # TAB 3: SIDE-BY-SIDE TIMBER COMPARISON
@@ -541,66 +588,7 @@ def render_recommendations_modal(furniture_id: str):
                 """), unsafe_allow_html=True)
 
     # -----------------------------------------------------------------------
-    # TAB 4: ARCHITECTURAL DESIGNS & BLUEPRINTS
-    # -----------------------------------------------------------------------
-    with tab_designs:
-        st.markdown(uhtml(f"""
-        <div style="margin-bottom:0.85rem;">
-          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;">Curated Carpentry Blueprints for {active_item['name']}</h4>
-          <p style="font-size:0.82rem;color:var(--muted);margin:0;">
-            Architectural joinery methods, finished proportions, optimal wood pairings, and master workshop blueprints.
-          </p>
-        </div>
-        """), unsafe_allow_html=True)
-
-        for d_idx, des in enumerate(active_item.get("recommended_designs", [])):
-            st.markdown(uhtml(f"""
-            <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:1.1rem;margin-bottom:0.95rem;box-shadow:0 3px 10px rgba(0,0,0,0.04);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.7rem;">
-                <div>
-                  <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-                    <span style="font-size:1.25rem;font-weight:800;color:var(--ink);font-family:'Cinzel',serif;">{des['title']}</span>
-                    <span style="background:var(--amber-soft);color:var(--ink);border:1px solid var(--amber);font-size:0.7rem;font-weight:700;padding:0.18rem 0.6rem;border-radius:4px;letter-spacing:0.04em;">{des['badge']}</span>
-                  </div>
-                  <p style="font-size:0.84rem;color:var(--muted);margin:0.3rem 0 0 0;line-height:1.5;">
-                    {des['description']}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Blueprint Specs Grid -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:0.7rem;margin:0.9rem 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0.8rem 0.95rem;">
-                <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Finished Dimensions</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{des['dimensions']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Recommended Joinery</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--good);margin-top:0.15rem;">{des['recommended_joinery']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Protective Finish</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{des['recommended_finish']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Optimal Timber Pairing</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--amber);margin-top:0.15rem;">{des['best_wood']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Design Load Capacity</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{des['load_capacity']}</div>
-                </div>
-              </div>
-
-              <div style="background:var(--amber-soft);border-left:4px solid var(--amber);padding:0.7rem 0.9rem;border-radius:0 6px 6px 0;font-size:0.81rem;color:var(--ink);line-height:1.5;">
-                <strong>Technical Blueprint Specification:</strong><br/>
-                {des['blueprint_tips']}
-              </div>
-            </div>
-            """), unsafe_allow_html=True)
-
-    # -----------------------------------------------------------------------
-    # TAB 5: WORKSHOP RULES
+    # TAB 4: WORKSHOP RULES & FABRICATION GUIDELINES
     # -----------------------------------------------------------------------
     with tab_rules:
         st.markdown(uhtml(f"""
