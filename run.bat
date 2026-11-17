@@ -1,12 +1,12 @@
 @echo off
-title Wood Intelligence — AI Timber Atelier
+title Wood Intelligence | Industrial Timber Inspection & Defect Suite
 cd /d "%~dp0"
 
 echo ===============================================================
-echo          WOOD INTELLIGENCE - AI TIMBER ATELIER
+echo       WOOD INTELLIGENCE | INDUSTRIAL TIMBER INSPECTION
 echo ===============================================================
-echo  Starting Application: http://localhost:8501
-echo  (Species Identification, Defect Detection, Furniture Studio)
+echo  Application Endpoint: http://localhost:8501
+echo  (Species Classification, Defect Segmentation, Joinery Studio)
 echo ===============================================================
 echo.
 
