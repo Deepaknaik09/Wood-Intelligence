@@ -329,7 +329,7 @@ def render_recommendations_modal(furniture_id: str):
                         else:
                             st.markdown(f'<div style="font-size:2rem;text-align:center;">{m_item["icon"]}</div>', unsafe_allow_html=True)
                             
-                        btn_txt = "[ACTIVE]" if is_current else f"Switch to {m_item['name']}"
+                        btn_txt = "✓ Active" if is_current else f"Switch to {m_item['name']}"
                         if st.button(btn_txt, key=f"dlg_switch_{explored_wood_id}_{m_item['id']}", use_container_width=True, type="primary" if is_current else "secondary"):
                             st.session_state["selected_furniture"] = m_item["id"]
                             st.session_state["active_modal"] = m_item["id"]

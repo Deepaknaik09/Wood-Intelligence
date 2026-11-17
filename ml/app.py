@@ -1,5 +1,5 @@
-"""Wood Intelligence | Streamlit Application.
-Multi-Page Dashboard for Industrial Timber Species Identification, Defect Detection & Furniture Suitability.
+"""Wood Intelligence — Streamlit Application.
+Multi-Page Dashboard for AI Wood Species Identification, Defect Detection & Furniture Suitability.
 """
 import os
 import io
@@ -614,7 +614,7 @@ def defect_label(class_id):
 
 def get_defect_style(label):
     return DEFECT_METADATA.get(label, {
-        "bgr": (120, 120, 120), "hex": "#64748b", "icon": "ALERT", "severity": "Medium",
+        "bgr": (120, 120, 120), "hex": "#64748b", "icon": "⚠️", "severity": "Medium",
         "category": "Surface Feature", "description": "Surface grain anomaly or marking",
         "repair": "Sand the area smooth and apply protective clear wood sealer.",
         "repair_type": "sanding"
@@ -904,7 +904,7 @@ def make_pdf_report(payload, original_bytes):
     h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontSize=12, textColor=rl_colors.HexColor("#6b3a1f"), fontName="Helvetica-Bold", spaceAfter=4)
     bs = ParagraphStyle("b", parent=styles["Normal"], fontSize=9.5, leading=14, spaceAfter=4)
     story = [
-        Paragraph("Wood Intelligence | Timber Defect & Species Report", ts),
+        Paragraph("Wood Intelligence — Timber Defect & Species Report", ts),
         Paragraph(f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", bs),
         HRFlowable(width="100%", thickness=1, color=rl_colors.HexColor("#e8dcc8")),
         Spacer(1, 8)
@@ -1727,7 +1727,7 @@ div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button[data-testid="
   transition: all 0.25s ease !important;
 }}
 
-/* Target Menu Icon and Chevron SVG: exact same color as down main heading (#ffd166) */
+/* Target Menu Icon (☰) and Chevron SVG: exact same color as down main heading (#ffd166) */
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button *,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button p,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button span,
@@ -2094,7 +2094,7 @@ elif st.session_state["current_page"] == "Overview":
     
 
     # Defect Frequency / Distribution Chart & Summary (Requirement 3 & 4)
-    st.markdown('<div class="wi-card"><div class="wi-card-header"><span class="wi-card-title">Defect Distribution & Quality Index</span><span class="wi-section-label">SYSTEM ANALYTICS</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="wi-card"><div class="wi-card-header"><span class="wi-card-title">📈 Common Defect Distribution & Quality Index</span><span class="wi-section-label">SYSTEM ANALYTICS</span></div>', unsafe_allow_html=True)
     
     c_chart, c_stat = st.columns([5, 3], gap="large")
     with c_chart:
@@ -2349,7 +2349,7 @@ elif st.session_state["current_page"] == "Defect Detection":
     if not R:
         st.markdown(uhtml("""
         <div class="wi-card" style="text-align:center;padding:3rem 1.5rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;letter-spacing:0.1em;color:var(--amber);margin-bottom:.8rem;">[NO SPECIMEN LOADED]</div>
+          <div style="font-size:3.5rem;margin-bottom:.6rem;">🔍</div>
           <h3 style="color:var(--ink);">No Defect Analysis Loaded</h3>
           <p style="color:var(--muted);max-width:500px;margin:0 auto 1.5rem auto;">
             Please select or upload a timber image from the New Analysis page to view segmentation masks and defect data.
@@ -2407,7 +2407,7 @@ elif st.session_state["current_page"] == "Defect Detection":
         # 5 Defect & Quality Metric Cards
         sev = R["sev"]
         sc_ = SEV_COLORS[sev]
-        sev_lbl = {"Low": "Within Spec (Low Risk)", "Medium": "Advisory (Medium Risk)", "High": "Out of Spec (High Risk)"}[sev]
+        sev_lbl = {"Low": "🟢 Safe (Low Risk)", "Medium": "🟠 Warning (Medium Risk)", "High": "🔴 Serious Damage (High Risk)"}[sev]
         d_color = "var(--bad)" if R["dmg"] > 2.0 else ("var(--warn)" if R["dmg"] > 0.6 else "var(--good)")
 
         m1, m2, m3, m4, m5 = st.columns(5)
@@ -2425,17 +2425,17 @@ elif st.session_state["current_page"] == "Defect Detection":
         st.markdown("<div style='height:.8rem;'></div>", unsafe_allow_html=True)
 
         # Side by Side Visualizer
-        st.markdown('<div class="wi-card"><div class="wi-card-header"><span class="wi-card-title">Defect Segmentation & Visual Evidence</span><span class="wi-section-label">SIDE-BY-SIDE INSPECTION</span></div>', unsafe_allow_html=True)
+        st.markdown('<div class="wi-card"><div class="wi-card-header"><span class="wi-card-title">🔬 Defect Segmentation & Visual Evidence</span><span class="wi-section-label">SIDE-BY-SIDE INSPECTION</span></div>', unsafe_allow_html=True)
         
         vmode = st.radio("Display View:", ["Side-by-Side Comparison", "Defect Segmentation Overlay", "Bounding Boxes Only", "Original Timber Only"], horizontal=True)
         
         if vmode == "Side-by-Side Comparison":
             img_c1, img_c2 = st.columns(2, gap="medium")
             with img_c1:
-                st.caption("Original Timber Specimen (Unprocessed)")
+                st.caption("📸 Original Timber Board")
                 st.image(R["orig_rgb"], use_container_width=True)
             with img_c2:
-                st.caption("Defect-Segmented Orthographic Map")
+                st.caption("🔍 Defect-Segmented Map")
                 st.image(R["seg"] if R["seg"] is not None else R["orig_rgb"], use_container_width=True)
         else:
             show = {"Defect Segmentation Overlay": R["seg"], "Bounding Boxes Only": R["box"], "Original Timber Only": R["orig_rgb"]}[vmode]
@@ -2444,20 +2444,20 @@ elif st.session_state["current_page"] == "Defect Detection":
         if R["seg"] is not None:
             buf = io.BytesIO()
             Image.fromarray(R["seg"]).save(buf, "JPEG", quality=95)
-            st.download_button("Download Segmented Image (JPG)", buf.getvalue(), file_name=f"{os.path.splitext(R['aname'])[0]}_segmented.jpg", mime="image/jpeg")
+            st.download_button("💾 Download High-Res Segmented Image", buf.getvalue(), file_name=f"{os.path.splitext(R['aname'])[0]}_segmented.jpg", mime="image/jpeg")
         st.markdown("</div>", unsafe_allow_html=True)
 
         # Defect List
-        st.markdown('<div class="wi-card"><div class="wi-card-header"><span class="wi-card-title">Detected Defect Instances</span><span class="wi-section-label">QUANTIFIED FAULTS</span></div>', unsafe_allow_html=True)
+        st.markdown('<div class="wi-card"><div class="wi-card-header"><span class="wi-card-title">📋 Detected Defect Instances</span><span class="wi-section-label">QUANTIFIED FAULTS</span></div>', unsafe_allow_html=True)
         if not R["ditems"]:
-            st.markdown('<div style="background:var(--good-tint);border:1px solid var(--good-border);border-radius:6px;padding:1.2rem;text-align:center;color:var(--good);font-weight:700;">Zero defects detected | Prime Clear Grade-A Timber (ASTM D143)</div>', unsafe_allow_html=True)
+            st.markdown('<div style="background:var(--good-tint);border:1px solid var(--good-border);border-radius:10px;padding:1.2rem;text-align:center;color:var(--good);font-weight:700;">Zero defects detected — Prime Clear Grade-A Timber!</div>', unsafe_allow_html=True)
         else:
             for d in R["ditems"]:
                 sc2 = SEV_COLORS[d["severity"]]
                 st.markdown(uhtml(f"""
-                <div class="audit-row" style="background:var(--surface);border:1.5px solid var(--line);border-radius:6px;padding:.75rem .9rem;margin-bottom:.55rem;display:flex;align-items:center;justify-content:space-between;">
+                <div class="audit-row" style="background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:.75rem .9rem;margin-bottom:.55rem;display:flex;align-items:center;justify-content:space-between;">
                   <div style="display:flex;align-items:center;gap:.6rem;">
-                    <span style="width:12px;height:12px;border-radius:2px;background:{d['color_hex']};display:inline-block;flex-shrink:0;"></span>
+                    <span style="width:12px;height:12px;border-radius:50%;background:{d['color_hex']};display:inline-block;flex-shrink:0;"></span>
                     <div>
                       <strong style="color:var(--ink);font-size:.9rem;">{d['label']}</strong>
                       <div style="font-size:.72rem;color:var(--muted);">Confidence: {d['confidence']*100:.0f}%</div>
@@ -2493,9 +2493,9 @@ elif st.session_state["current_page"] == "Furniture Recommendations":
         scan_mor = sp_scan.get("mor", 80)
         scan_dmg = R_scan.get("dmg", 0.0)
 
-        with st.expander(f"Specimen Compatibility Audit: {scan_name} vs {active_item['name']}", expanded=False):
+        with st.expander(f"🔎 Optional: Check Uploaded Specimen Compatibility ({scan_name} vs {active_item['name']})", expanded=False):
             st.markdown(uhtml(f"""
-            <div style="background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:6px;padding:0.9rem 1.2rem;margin-bottom:0.75rem;font-size:0.85rem;color:var(--muted);">
+            <div style="background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:12px;padding:0.9rem 1.2rem;margin-bottom:0.75rem;font-size:0.85rem;color:var(--muted);">
               <div><strong>Uploaded Specimen:</strong> {scan_name} ({sp_scan.get('botanical_name', '')})</div>
               <div style="margin-top:0.2rem;">Measured Surface Damage: <strong>{scan_dmg:.2f}%</strong> | Base Specimen MOR: <strong>{scan_mor} MPa</strong></div>
             </div>
@@ -2510,10 +2510,10 @@ elif st.session_state["current_page"] == "Furniture Recommendations":
 
             is_compat = (scan_mor >= req_mor_val) and (scan_dmg <= 3.0)
             if is_compat:
-                st.success(f"[PASS] {scan_name} meets the mechanical bending requirements ({scan_mor} MPa >= {req_mor_val} MPa) and defect tolerances for constructing a {active_item['name']}.")
+                st.success(f"✓ {scan_name} meets the mechanical bending requirements ({scan_mor} MPa ≥ {req_mor_val} MPa) and defect tolerances for constructing a {active_item['name']}.")
             else:
                 reason = f"has lower MOR ({scan_mor} MPa < required {req_mor_val} MPa)" if scan_mor < req_mor_val else f"damage of {scan_dmg:.2f}% exceeds high-stress tolerance"
-                st.warning(f"[NOTICE] {scan_name} is conditionally or marginally suitable for {active_item['name']} because it {reason}. Consider using one of the top recommended species above.")
+                st.warning(f"⚠️ {scan_name} is conditionally or marginally suitable for {active_item['name']} because it {reason}. Consider using one of the top recommended species above.")
 
 
 # ===========================================================================
@@ -2550,7 +2550,7 @@ elif st.session_state["current_page"] == "Compare Wood":
         if not upb and st.session_state.get("cmp_b_sample") and os.path.exists(st.session_state["cmp_b_sample"]):
             st.caption(f"Using Preset B: {os.path.basename(st.session_state['cmp_b_sample'])}")
 
-    run_cmp = st.button("Execute Comparative Specimen Benchmark", type="primary")
+    run_cmp = st.button("⚔️ Run Head-to-Head Comparison", type="primary")
 
     def analyse_cmp(input_source):
         if not input_source:
@@ -2619,10 +2619,10 @@ elif st.session_state["current_page"] == "Compare Wood":
                     loser = (rb if winner == ra else ra)
                     wlbl = "Wood A" if winner == ra else "Wood B"
                     st.markdown(uhtml(f"""
-                    <div style="background:var(--good-tint);border:2px solid var(--good-border);border-radius:8px;padding:1.2rem;margin:1rem 0;text-align:center;">
-                      <div style="font-size:1.4rem;font-weight:800;color:var(--good);letter-spacing:0.03em;">OPTIMAL SPECIMEN: {wlbl} for {FURNITURE_CATALOG[tf]['name']}</div>
+                    <div style="background:var(--good-tint);border:2px solid var(--good-border);border-radius:14px;padding:1.2rem;margin:1rem 0;text-align:center;">
+                      <div style="font-size:1.6rem;font-weight:800;color:var(--good);">🏆 {wlbl} is Better for {FURNITURE_CATALOG[tf]['name']}!</div>
                       <div style="color:var(--good);font-size:.9rem;margin-top:.2rem;">
-                        Inspection Score: <strong>{winner['fr']['score']}/100</strong> vs {loser['fr']['score']}/100 &bull; Differential: <strong>+{winner['fr']['score']-loser['fr']['score']} pts</strong>
+                        Score: <strong>{winner['fr']['score']}/100</strong> vs {loser['fr']['score']}/100 • Advantage: <strong>+{winner['fr']['score']-loser['fr']['score']} pts</strong>
                       </div>
                     </div>
                     """), unsafe_allow_html=True)
@@ -2634,8 +2634,8 @@ elif st.session_state["current_page"] == "Compare Wood":
                         sp_disp = (res.get("sp_info") or {}).get("common_name", "Timber")
                         with col:
                             st.markdown(uhtml(f"""
-                            <div style="background:var(--surface);border:{'2px solid var(--good)' if is_win else '1px solid var(--line)'};border-radius:8px;padding:1.1rem;">
-                              <div style="font-size:1.15rem;font-weight:800;color:var(--ink);margin-bottom:.5rem;">{'[OPTIMAL SPECIMEN] ' if is_win else ''}{lbl}</div>
+                            <div style="background:var(--surface);border:{'2px solid var(--good)' if is_win else '1px solid var(--line)'};border-radius:14px;padding:1.1rem;">
+                              <div style="font-size:1.15rem;font-weight:800;color:var(--ink);margin-bottom:.5rem;">{'★ WINNER: ' if is_win else ''}{lbl}</div>
                               <div style="display:flex;gap:1rem;margin-bottom:.6rem;">
                                 <div style="text-align:center;">
                                   <div style="font-size:1.85rem;font-weight:800;color:{sc_};font-family:'JetBrains Mono',monospace;">{fr['score']}</div>
@@ -2664,7 +2664,7 @@ elif st.session_state["current_page"] == "Analysis History":
     if not history:
         st.markdown(uhtml("""
         <div style="text-align:center;padding:2.8rem;color:var(--muted);">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;letter-spacing:0.1em;color:var(--amber);margin-bottom:.5rem;">[EMPTY AUDIT TRAIL]</div>
+          <div style="font-size:3rem;">📋</div>
           <h4>No Inspection History Logged</h4>
           <p>Execute an analysis on the New Analysis page to view historical timber records here.</p>
         </div>
@@ -2691,7 +2691,7 @@ elif st.session_state["current_page"] == "Analysis History":
             sv = entry.get("severity", "Low")
             sc2 = SEV_COLORS.get(sv, SEV_COLORS["Low"])
             st.markdown(uhtml(f"""
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;border-radius:6px;background:var(--surface);border:1px solid var(--line);margin-bottom:.45rem;font-size:.84rem;flex-wrap:wrap;gap:.6rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin-bottom:.45rem;font-size:.84rem;flex-wrap:wrap;gap:.6rem;">
               <div style="display:flex;align-items:center;gap:.7rem;flex:1;">
                 <strong style="color:var(--ink);">{entry.get('filename', 'specimen.jpg')}</strong>
                 <span style="background:{sc2['bg']};color:{sc2['text']};border:1px solid {sc2['border']};font-size:.72rem;padding:.15rem .5rem;border-radius:4px;font-weight:700;">{sv}</span>
@@ -2709,10 +2709,10 @@ elif st.session_state["current_page"] == "Analysis History":
         st.markdown("<div style='height:.8rem;'></div>", unsafe_allow_html=True)
         btn_d1, btn_d2 = st.columns([2, 1])
         with btn_d1:
-            st.download_button("Export Audit Log (JSON)", json.dumps(history, indent=2).encode(),
+            st.download_button("💾 Download History Audit (JSON)", json.dumps(history, indent=2).encode(),
                                file_name="timber_analysis_history.json", mime="application/json", use_container_width=True)
         with btn_d2:
-            if st.button("Clear Audit Log Records", type="secondary", use_container_width=True):
+            if st.button("🗑️ Clear History Records", type="secondary", use_container_width=True):
                 if os.path.exists(HISTORY_FILE):
                     os.remove(HISTORY_FILE)
                 st.success("History records cleared.")
@@ -2728,7 +2728,7 @@ elif st.session_state["current_page"] == "Reports":
     if not R or not R.get("is_w"):
         st.markdown(uhtml("""
         <div class="wi-card" style="text-align:center;padding:3rem 1.5rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;letter-spacing:0.1em;color:var(--amber);margin-bottom:.5rem;">[NO SPECIMEN SELECTED]</div>
+          <div style="font-size:3.5rem;margin-bottom:.6rem;">📑</div>
           <h3 style="color:var(--ink);">No Specimen Ready for Report Generation</h3>
           <p style="color:var(--muted);max-width:500px;margin:0 auto 1.5rem auto;">
             Please execute a timber analysis first to generate official PDF reports, verification QR codes, and voice audio summaries.
@@ -2750,7 +2750,7 @@ elif st.session_state["current_page"] == "Settings":
 
     s1, s2 = st.columns(2, gap="large")
     with s1:
-        st.markdown("#### Optical Detection Parameters")
+        st.markdown("#### 🎛️ AI Detection Parameters")
         st.session_state["conf_threshold"] = st.slider("Global Defect Confidence Threshold", 0.10, 0.90, float(st.session_state["conf_threshold"]), 0.05,
                                                       help="Lower values report more borderline defects; higher values suppress noise.")
         st.session_state["wood_threshold"] = st.slider("Wood Authenticity Gate Threshold", 0.10, 0.95, float(st.session_state["wood_threshold"]), 0.01,
@@ -2760,32 +2760,16 @@ elif st.session_state["current_page"] == "Settings":
                                                     index=["strength", "best_appearance", "low_cost"].index(st.session_state["rec_priority"]))
 
     with s2:
-        st.markdown("#### Inference Model Architecture & Diagnostic Pipeline")
+        st.markdown("#### 🔬 AI Model Architecture")
         st.markdown(uhtml("""
-        <div style="background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:6px;padding:1rem;font-size:.84rem;line-height:1.6;">
-          <div>[01] <strong>Species Classifier:</strong> Fine-Tuned ResNet50 (12 Botanical Classes)</div>
-          <div>[02] <strong>Defect Detector:</strong> YOLOv11n (416x416 anchors, 9 defect categories)</div>
-          <div>[03] <strong>Authenticity Gate:</strong> MobileNetV2 (Wood vs Non-Wood Substrate)</div>
-          <div>[04] <strong>Segmentation:</strong> Computer Vision Otsu Morphological Masking (0.1 mm/px)</div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:12px;padding:1rem;font-size:.84rem;line-height:1.6;">
+          <div>🧠 <strong>Species Classifier:</strong> Fine-Tuned ResNet50 (12 Classes)</div>
+          <div>🎯 <strong>Defect Detector:</strong> YOLOv11n (416×416 anchors)</div>
+          <div>🛡️ <strong>Authenticity Gate:</strong> MobileNetV2 (Wood vs Non-Wood)</div>
+          <div>📐 <strong>Segmentation:</strong> Computer Vision Otsu Morphological Masking</div>
           <hr style="border:none;border-bottom:1px solid var(--line);margin:.6rem 0;" />
-          <div style="color:var(--good);font-weight:700;">[SYSTEM ACTIVE] Hardware Acceleration: CPU Standard Inference</div>
+          <div style="color:var(--good);font-weight:700;">✓ Hardware Status: CPU Acceleration Active</div>
         </div>
         """), unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
-
-# ---------------------------------------------------------------------------
-# ENTERPRISE COMPLIANCE & SPECIFICATION FOOTER
-# ---------------------------------------------------------------------------
-st.markdown(uhtml("""
-<div style="border-top:1px solid var(--line);padding:1.6rem 0 0.8rem 0;margin-top:2.5rem;text-align:center;font-size:0.78rem;color:var(--muted);font-family:'Inter',sans-serif;">
-  <strong>WOOD INTELLIGENCE</strong> &bull; Industrial Timber Optical Inspection & Quality Control Suite<br/>
-  Calibration Standard: ASTM D143 / ISO 3130 &bull; Pixel Resolution: 416 px / 0.1 mm precision &bull; System Ver: 2.4.0-PROD<br/>
-  <div style="margin-top:0.4rem;">
-    <span style="color:var(--muted);margin:0 0.5rem;">Documentation</span> &bull;
-    <span style="color:var(--muted);margin:0 0.5rem;">ASTM Specifications</span> &bull;
-    <span style="color:var(--muted);margin:0 0.5rem;">Inspection Terms</span> &bull;
-    <span style="color:var(--muted);margin:0 0.5rem;">Privacy Policy</span>
-  </div>
-</div>
-"""), unsafe_allow_html=True)
