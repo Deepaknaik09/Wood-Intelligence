@@ -23,6 +23,10 @@ from PIL import Image, ImageFilter, ImageEnhance
 import predict
 import wood_gate
 import furniture_recommender
+try:
+    import auth
+except ImportError:
+    from ml import auth
 
 try:
     import plotly
@@ -569,6 +573,10 @@ st.set_page_config(
 )
 
 # Initialize Session State
+if "user" not in st.session_state:
+    st.session_state["user"] = None
+if "show_auth_modal" not in st.session_state:
+    st.session_state["show_auth_modal"] = False
 if "theme" not in st.session_state:
     st.session_state["theme"] = "light"
 if "current_page" not in st.session_state:
@@ -903,9 +911,11 @@ def make_pdf_report(payload, original_bytes):
     ts = ParagraphStyle("t", parent=styles["Title"], fontSize=18, textColor=rl_colors.HexColor("#3d2007"), fontName="Helvetica-Bold", spaceAfter=6)
     h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontSize=12, textColor=rl_colors.HexColor("#6b3a1f"), fontName="Helvetica-Bold", spaceAfter=4)
     bs = ParagraphStyle("b", parent=styles["Normal"], fontSize=9.5, leading=14, spaceAfter=4)
+    insp = payload.get("inspector", "Lead Timber Inspector")
+    insp_r = payload.get("inspector_role", "Quality Auditor")
     story = [
         Paragraph("Wood Intelligence — Timber Defect & Species Report", ts),
-        Paragraph(f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", bs),
+        Paragraph(f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} &bull; Certified Inspector: <b>{insp}</b> ({insp_r})", bs),
         HRFlowable(width="100%", thickness=1, color=rl_colors.HexColor("#e8dcc8")),
         Spacer(1, 8)
     ]
@@ -992,6 +1002,8 @@ def render_inspection_report(R, key_prefix="report"):
     payload = {
         "timestamp": R["ts"], "filename": R["aname"], "wood_score": round(R["ws"], 4),
         "species_details": sp_data, "dimensions": R["dims"],
+        "inspector": R.get("inspector", "Lead Timber Inspector"),
+        "inspector_role": R.get("inspector_role", "Quality Auditor"),
         "damage_metrics": {
             "damaged_pct": round(R["dmg"], 4), "usable_pct": round(R["usbl"], 4),
             "waste_pct": round(R["wst"], 4), "defect_count": len(R["dets"]), "severity": R["sev"],
@@ -1036,13 +1048,14 @@ NAV_OPTIONS = [
 ]
 
 # Timber Atelier Masthead (Matches media_1793688954155_c8a2a591.jpg)
-head_c1, head_c2, head_c3, head_c4 = st.columns([1.15, 4.8, 1.65, 2.4], vertical_alignment="center")
+head_c1, head_c2, head_c3, head_c4, head_c5 = st.columns([1.1, 4.3, 1.35, 2.05, 1.8], vertical_alignment="center")
 
 with head_c1:
     st.markdown("""<style>
     div[data-testid="stPopover"] button,
     .stPopover button,
-    div[data-testid="stColumn"]:first-child button {
+    div[data-testid="stColumn"]:first-child button,
+    div[data-testid="stColumn"]:nth-child(5) button {
         background: rgba(255, 209, 102, 0.2) !important;
         border: 1.5px solid #ffd166 !important;
         border-radius: 6px !important;
@@ -1058,19 +1071,23 @@ with head_c1:
     .stPopover button svg,
     div[data-testid="stColumn"]:first-child button p,
     div[data-testid="stColumn"]:first-child button span,
-    div[data-testid="stColumn"]:first-child button svg {
+    div[data-testid="stColumn"]:first-child button svg,
+    div[data-testid="stColumn"]:nth-child(5) button p,
+    div[data-testid="stColumn"]:nth-child(5) button span,
+    div[data-testid="stColumn"]:nth-child(5) button svg {
         color: #ffd166 !important;
         fill: #ffd166 !important;
         stroke: #ffd166 !important;
         font-weight: 800 !important;
-        font-size: 0.95rem !important;
-        letter-spacing: 0.05em !important;
+        font-size: 0.92rem !important;
+        letter-spacing: 0.04em !important;
         opacity: 1 !important;
         visibility: visible !important;
         text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
     }
     div[data-testid="stPopover"] button:hover,
-    .stPopover button:hover {
+    .stPopover button:hover,
+    div[data-testid="stColumn"]:nth-child(5) button:hover {
         background: #ffd166 !important;
         border-color: #ffd166 !important;
     }
@@ -1079,7 +1096,10 @@ with head_c1:
     div[data-testid="stPopover"] button:hover svg,
     .stPopover button:hover p,
     .stPopover button:hover span,
-    .stPopover button:hover svg {
+    .stPopover button:hover svg,
+    div[data-testid="stColumn"]:nth-child(5) button:hover p,
+    div[data-testid="stColumn"]:nth-child(5) button:hover span,
+    div[data-testid="stColumn"]:nth-child(5) button:hover svg {
         color: #1a0f07 !important;
         fill: #1a0f07 !important;
         stroke: #1a0f07 !important;
@@ -1096,6 +1116,29 @@ with head_c1:
             is_active = (st.session_state["current_page"] == page_name)
             if st.button(f"{icon}  {short_label}", key=f"nav_pop_{page_name}", use_container_width=True, type="primary" if is_active else "secondary"):
                 st.session_state["current_page"] = page_name
+                st.rerun()
+
+        st.markdown("<hr style='margin:0.6rem 0;border:none;border-bottom:1px solid var(--line);'>", unsafe_allow_html=True)
+        curr_u = st.session_state.get("user")
+        if curr_u and curr_u.get("is_authenticated"):
+            st.markdown(uhtml(f"""
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.35rem;">
+              👤 <strong style="color:var(--ink);">{curr_u.get('full_name')}</strong><br/>
+              <span style="color:var(--amber);font-size:0.7rem;font-weight:700;">{curr_u.get('role')}</span>
+            </div>
+            """), unsafe_allow_html=True)
+            if st.button("🚪 Sign Out", key="menu_btn_signout", use_container_width=True, type="secondary"):
+                st.session_state["user"] = None
+                st.toast("Signed out successfully.", icon="👋")
+                st.rerun()
+        else:
+            st.markdown(uhtml("""
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.35rem;">
+              Guest Session &bull; Uncertified
+            </div>
+            """), unsafe_allow_html=True)
+            if st.button("🔐 Sign In / Register", key="menu_btn_signin", use_container_width=True, type="primary"):
+                st.session_state["show_auth_modal"] = True
                 st.rerun()
 
 with head_c2:
@@ -1117,6 +1160,31 @@ with head_c4:
       </div>
     </div>
     """), unsafe_allow_html=True)
+
+with head_c5:
+    curr_u = st.session_state.get("user")
+    if curr_u and curr_u.get("is_authenticated"):
+        first_name = curr_u.get("full_name", "Inspector").split()[0]
+        with st.popover(f"👤 {first_name}", use_container_width=True, help="Inspector Profile & Session"):
+            st.markdown(uhtml(f"""
+            <div style="padding-bottom:0.4rem;border-bottom:1px solid var(--line);margin-bottom:0.5rem;">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;color:var(--ink);">{curr_u.get('full_name')}</div>
+              <div style="font-size:0.75rem;font-weight:700;color:var(--amber);letter-spacing:0.04em;text-transform:uppercase;">{curr_u.get('role')}</div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">@{curr_u.get('username')} &bull; <span style="color:var(--good);font-weight:700;">Active</span></div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.7rem;line-height:1.5;">
+              <div>Audit Status: <strong style="color:var(--good);">Verified Inspector</strong></div>
+              <div>Last Login: <strong>{curr_u.get('last_login', 'Today')}</strong></div>
+            </div>
+            """), unsafe_allow_html=True)
+            if st.button("🚪 Sign Out", key="head_btn_signout", use_container_width=True, type="secondary"):
+                st.session_state["user"] = None
+                st.toast("Signed out successfully.", icon="👋")
+                st.rerun()
+    else:
+        if st.button("🔐 Sign In", key="head_btn_signin", use_container_width=True, help="Inspector Sign In or Sign Up"):
+            st.session_state["show_auth_modal"] = True
+            st.rerun()
 
 # ---------------------------------------------------------------------------
 # INJECT THEME & BUTTON CSS (BUILT ON EVERY RUN FROM 'dark' TOGGLE)
@@ -2044,6 +2112,30 @@ div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-baseweb="check
   min-height: 220px;
 }}
 
+/* Form inputs & controls */
+div[data-testid="stTextInput"] input {
+  background-color: var(--surface-2) !important;
+  color: var(--ink) !important;
+  border: 1.5px solid var(--line) !important;
+  border-radius: 6px !important;
+}
+div[data-testid="stTextInput"] input:focus {
+  border-color: var(--amber) !important;
+  box-shadow: 0 0 0 1px var(--amber) !important;
+}
+div[data-testid="stTextInput"] label p,
+div[data-testid="stSelectbox"] label p {
+  color: var(--ink) !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+}
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+  background-color: var(--surface-2) !important;
+  color: var(--ink) !important;
+  border: 1.5px solid var(--line) !important;
+  border-radius: 6px !important;
+}
+
 /* Prefers-reduced-motion: reduce (Requirement 6) */
 @media (prefers-reduced-motion: reduce) {{
   *, ::before, ::after {{
@@ -2056,6 +2148,78 @@ div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-baseweb="check
 </style>
 """
 st.markdown(theme_css, unsafe_allow_html=True)
+
+# ===========================================================================
+# INSPECTOR AUTHENTICATION & CREDENTIALS MODAL
+# ===========================================================================
+@st.dialog("Timber Atelier — Inspector Credentials", width="medium")
+def render_auth_modal():
+    st.markdown(uhtml("""
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;line-height:1.45;">
+      Sign in or create your credentials to stamp your name on timber inspection logs, verify quality grading benchmarks, and sign formal engineering joinery reports.
+    </div>
+    """), unsafe_allow_html=True)
+
+    tab_login, tab_signup = st.tabs(["🔑 Sign In", "📝 Create Inspector Account"])
+
+    with tab_login:
+        with st.form("form_auth_login", clear_on_submit=False):
+            login_user = st.text_input("Username", key="auth_login_user", placeholder="e.g. inspector")
+            login_pass = st.text_input("Password", key="auth_login_pass", type="password", placeholder="••••••••")
+            submit_login = st.form_submit_button("Sign In to Suite", type="primary", use_container_width=True)
+
+            if submit_login:
+                user, msg = auth.authenticate_user(login_user, login_pass)
+                if user:
+                    st.session_state["user"] = user
+                    st.session_state["show_auth_modal"] = False
+                    st.toast(f"Welcome back, {user['full_name']}!", icon="✅")
+                    st.rerun()
+                else:
+                    st.error(msg)
+
+        st.markdown(uhtml("""
+        <div style="background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:0.55rem 0.8rem;margin-top:0.75rem;font-size:0.78rem;color:var(--muted);">
+          💡 <strong>Default Demo Credentials:</strong> Username: <code style="color:var(--amber);font-weight:700;">inspector</code> &bull; Password: <code style="color:var(--amber);font-weight:700;">timber123</code>
+        </div>
+        """), unsafe_allow_html=True)
+
+    with tab_signup:
+        with st.form("form_auth_signup", clear_on_submit=False):
+            reg_name = st.text_input("Full Name & Title", key="auth_reg_name", placeholder="e.g. Deepak Naik")
+            reg_user = st.text_input("Username", key="auth_reg_user", placeholder="e.g. deepak")
+            reg_role = st.selectbox("Professional Role", auth.INSPECTOR_ROLES, index=0)
+            reg_p1 = st.text_input("Password", key="auth_reg_p1", type="password", placeholder="Minimum 6 characters")
+            reg_p2 = st.text_input("Confirm Password", key="auth_reg_p2", type="password", placeholder="Confirm password")
+            submit_reg = st.form_submit_button("Register Inspector Profile", type="primary", use_container_width=True)
+
+            if submit_reg:
+                if reg_p1 != reg_p2:
+                    st.error("Passwords do not match. Please re-enter.")
+                else:
+                    ok, msg = auth.register_user(reg_user, reg_p1, reg_name, reg_role)
+                    if ok:
+                        user, _ = auth.authenticate_user(reg_user, reg_p1)
+                        st.session_state["user"] = user
+                        st.session_state["show_auth_modal"] = False
+                        st.toast(f"Inspector account registered! Welcome, {reg_name}!", icon="🎉")
+                        st.rerun()
+                    else:
+                        st.error(msg)
+
+    st.markdown("<hr style='margin:1rem 0 0.8rem 0;border:none;border-bottom:1px solid var(--line);'>", unsafe_allow_html=True)
+    c_guest, c_close = st.columns(2)
+    with c_guest:
+        if st.button("Continue as Guest Inspector", key="btn_guest_bypass", use_container_width=True):
+            st.session_state["show_auth_modal"] = False
+            st.rerun()
+    with c_close:
+        if st.button("Close Window", key="btn_dlg_close_auth", use_container_width=True):
+            st.session_state["show_auth_modal"] = False
+            st.rerun()
+
+if st.session_state.get("show_auth_modal"):
+    render_auth_modal()
 
 # PAGE 1: HOME PAGE
 # ===========================================================================
@@ -2329,7 +2493,7 @@ elif st.session_state["current_page"] == "Overview":
                 <span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:800;color:var(--amber);">SPEC</span>
                 <div>
                   <strong style="color:var(--ink);font-size:.88rem;font-weight:700;">{entry.get('filename', 'specimen.jpg')}</strong>
-                  <div style="font-size:.74rem;color:var(--muted);">{entry.get('species', 'Timber')} &bull; {entry.get('timestamp', '')}</div>
+                  <div style="font-size:.74rem;color:var(--muted);">{entry.get('species', 'Timber')} &bull; {entry.get('timestamp', '')} {f"&bull; <span style='color:var(--amber);font-weight:600;'>👤 {entry.get('inspector')}</span>" if entry.get('inspector') else ""}</div>
                 </div>
               </div>
               <div style="display:flex;align-items:center;gap:1.2rem;font-size:.82rem;">
@@ -2476,6 +2640,17 @@ elif st.session_state["current_page"] == "New Analysis":
                     "priority": st.session_state["rec_priority"], "ts": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
 
+                active_user = st.session_state.get("user")
+                if active_user and active_user.get("is_authenticated"):
+                    insp_name = active_user.get("full_name")
+                    insp_role = active_user.get("role")
+                else:
+                    insp_name = "Guest Inspector"
+                    insp_role = "General Access"
+
+                st.session_state["last_result"]["inspector"] = insp_name
+                st.session_state["last_result"]["inspector_role"] = insp_role
+
                 save_history({
                     "timestamp": st.session_state["last_result"]["ts"], "filename": aname,
                     "wood_score": round(ws, 3), "is_wood": is_w, "damaged_pct": round(dmg, 2),
@@ -2483,7 +2658,9 @@ elif st.session_state["current_page"] == "New Analysis":
                     "defect_count": len(dets),
                     "best_furniture": furn_results[0]["name"] if furn_results else "N/A",
                     "best_score": furn_results[0]["score"] if furn_results else 0,
-                    "species": sp_info["name"] if sp_info else "Unknown"
+                    "species": sp_info["name"] if sp_info else "Unknown",
+                    "inspector": insp_name,
+                    "inspector_role": insp_role
                 })
 
                 st.success("Analysis Complete! Redirecting to Defect Detection view...")
@@ -2845,7 +3022,7 @@ elif st.session_state["current_page"] == "Analysis History":
               <div style="display:flex;align-items:center;gap:.7rem;flex:1;">
                 <strong style="color:var(--ink);">{entry.get('filename', 'specimen.jpg')}</strong>
                 <span style="background:{sc2['bg']};color:{sc2['text']};border:1px solid {sc2['border']};font-size:.72rem;padding:.15rem .5rem;border-radius:4px;font-weight:700;">{sv}</span>
-                <span style="font-size:.78rem;color:var(--muted);">{entry.get('species', 'Timber')}</span>
+                <span style="font-size:.78rem;color:var(--muted);">{entry.get('species', 'Timber')}{f" &bull; 👤 {entry.get('inspector')}" if entry.get('inspector') else ""}</span>
               </div>
               <div style="display:flex;align-items:center;gap:1.2rem;font-size:.82rem;color:var(--muted);">
                 <span>Damage: <strong>{entry.get('damaged_pct', 0):.2f}%</strong></span>
