@@ -1,9 +1,9 @@
 @echo off
-title Wood Intelligence | Industrial Timber Inspection & Defect Suite
+title Wood Intelligence - Industrial Timber Inspection
 cd /d "%~dp0"
 
 echo ===============================================================
-echo       WOOD INTELLIGENCE | INDUSTRIAL TIMBER INSPECTION
+echo       WOOD INTELLIGENCE - INDUSTRIAL TIMBER INSPECTION
 echo ===============================================================
 echo  Application Endpoint: http://localhost:8501
 echo  (Species Classification, Defect Segmentation, Joinery Studio)
