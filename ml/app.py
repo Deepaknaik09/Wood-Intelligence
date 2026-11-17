@@ -1036,9 +1036,56 @@ NAV_OPTIONS = [
 ]
 
 # Timber Atelier Masthead (Matches media_1793688954155_c8a2a591.jpg)
-head_c1, head_c2, head_c3, head_c4 = st.columns([0.95, 4.9, 1.85, 2.3], vertical_alignment="center")
+head_c1, head_c2, head_c3, head_c4 = st.columns([1.15, 4.8, 1.65, 2.4], vertical_alignment="center")
 
 with head_c1:
+    st.markdown("""<style>
+    div[data-testid="stPopover"] button,
+    .stPopover button,
+    div[data-testid="stColumn"]:first-child button {
+        background: rgba(255, 209, 102, 0.2) !important;
+        border: 1.5px solid #ffd166 !important;
+        border-radius: 6px !important;
+        min-height: 38px !important;
+        height: 38px !important;
+    }
+    div[data-testid="stPopover"] button p,
+    div[data-testid="stPopover"] button span,
+    div[data-testid="stPopover"] button div,
+    div[data-testid="stPopover"] button svg,
+    .stPopover button p,
+    .stPopover button span,
+    .stPopover button svg,
+    div[data-testid="stColumn"]:first-child button p,
+    div[data-testid="stColumn"]:first-child button span,
+    div[data-testid="stColumn"]:first-child button svg {
+        color: #ffd166 !important;
+        fill: #ffd166 !important;
+        stroke: #ffd166 !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.05em !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+    }
+    div[data-testid="stPopover"] button:hover,
+    .stPopover button:hover {
+        background: #ffd166 !important;
+        border-color: #ffd166 !important;
+    }
+    div[data-testid="stPopover"] button:hover p,
+    div[data-testid="stPopover"] button:hover span,
+    div[data-testid="stPopover"] button:hover svg,
+    .stPopover button:hover p,
+    .stPopover button:hover span,
+    .stPopover button:hover svg {
+        color: #1a0f07 !important;
+        fill: #1a0f07 !important;
+        stroke: #1a0f07 !important;
+        text-shadow: none !important;
+    }
+    </style>""", unsafe_allow_html=True)
     with st.popover("Menu", use_container_width=True, help="Navigation Menu"):
         st.markdown(uhtml("""
         <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.05rem;color:var(--ink);margin-bottom:0.4rem;padding-bottom:0.3rem;border-bottom:1px solid var(--line);">
@@ -1055,7 +1102,7 @@ with head_c2:
     st.markdown(uhtml("""
     <div class="wi-header-anchor" style="display:flex;align-items:center;gap:0.75rem;min-height:38px;">
       <span class="wi-header-brand-title" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.3rem;font-weight:800;letter-spacing:0.18em;color:#ffd166 !important;text-transform:uppercase;white-space:nowrap;">WOOD INTELLIGENCE</span>
-      <span class="wi-header-atelier-pill" style="font-size:0.68rem;background:rgba(217,143,43,0.18);color:#ffd166 !important;padding:0.2rem 0.55rem;border-radius:4px;font-weight:700;letter-spacing:0.06em;border:1px solid rgba(245,158,11,0.4);white-space:nowrap;">OPTICAL TIMBER INSPECTION SUITE</span>
+      <span class="wi-header-atelier-pill" style="font-size:0.72rem;background:rgba(255,209,102,0.18);color:#ffe082 !important;padding:0.25rem 0.65rem;border-radius:4px;font-weight:800;letter-spacing:0.08em;border:1.5px solid rgba(255,209,102,0.55);white-space:nowrap;">OPTICAL TIMBER INSPECTION SUITE</span>
     </div>
     """), unsafe_allow_html=True)
 
@@ -1065,7 +1112,7 @@ with head_c3:
 with head_c4:
     st.markdown(uhtml("""
     <div style="display:flex;justify-content:flex-end;align-items:center;min-height:38px;">
-      <div style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.72rem;background:rgba(16,185,129,0.14);border:1px solid rgba(52,211,153,0.35);color:#6ee7b7;padding:0.22rem 0.65rem;border-radius:4px;font-weight:700;letter-spacing:0.04em;white-space:nowrap;">
+      <div style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.74rem;background:rgba(16,185,129,0.18);border:1.5px solid rgba(52,211,153,0.55);color:#6ee7b7;padding:0.25rem 0.75rem;border-radius:4px;font-weight:800;letter-spacing:0.05em;white-space:nowrap;">
         <span style="font-size:0.5rem;color:#7dffb0;">●</span> SYSTEM READY · CALIBRATED
       </div>
     </div>
@@ -1680,11 +1727,11 @@ table td, [data-testid="stTable"] td {{
 
 /* Top Walnut Header Bar (Dark in BOTH modes) */
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) {{
-  background: linear-gradient(90deg, #2b180d 0%, #3e2213 50%, #2b180d 100%) !important;
-  border-radius: 14px !important;
-  padding: 0.45rem 1.1rem !important;
+  background: linear-gradient(90deg, #1f1107 0%, #341b0d 50%, #1f1107 100%) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1.1rem !important;
   border: 1.5px solid #5a3518 !important;
-  box-shadow: 0 4px 16px rgba(43, 24, 13, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(25, 12, 5, 0.45) !important;
   margin-bottom: 0.75rem !important;
   align-items: center !important;
 }}
@@ -1704,57 +1751,101 @@ div[data-testid="stHorizontalBlock"] .wi-header-brand-title {{
 
 .wi-header-atelier-pill,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) .wi-header-atelier-pill {{
-  color: #ffd166 !important;
-  background: rgba(217, 143, 43, 0.22) !important;
-  border: 1px solid rgba(245, 158, 11, 0.55) !important;
-  font-weight: 700 !important;
+  color: #ffe082 !important;
+  background: rgba(255, 209, 102, 0.18) !important;
+  border: 1.5px solid rgba(255, 209, 102, 0.55) !important;
+  font-weight: 800 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.08em !important;
+  padding: 0.22rem 0.65rem !important;
+  border-radius: 4px !important;
 }}
 
-/* Menu Popover Button in the Top Header Bar */
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopoverButton"],
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) .stPopover > button,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:has(svg),
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button[data-testid="stBaseButton-secondary"] {{
-  background: rgba(255, 255, 255, 0.08) !important;
+/* Menu Popover Button in Header - Ultra-High Visibility & Contrast */
+.stPopover button,
+[data-testid="stPopover"] button,
+[data-testid="stPopover"] [data-testid="stBaseButton-secondary"],
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] button,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stBaseButton-secondary"],
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button {{
+  background: rgba(255, 209, 102, 0.2) !important;
   color: #ffd166 !important;
-  border: 1.5px solid rgba(217, 143, 43, 0.6) !important;
-  border-radius: 10px !important;
+  border: 1.5px solid #ffd166 !important;
+  border-radius: 6px !important;
   min-height: 38px !important;
   height: 38px !important;
-  padding: 0 0.65rem !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
-  transition: all 0.25s ease !important;
+  padding: 0 0.95rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+  transition: all 0.2s ease !important;
 }}
 
-/* Target Menu Icon (☰) and Chevron SVG: exact same color as down main heading (#ffd166) */
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button *,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button p,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button span,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button div,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button svg {{
+/* All Text, Labels, Spans, Paragraphs and SVGs inside the Menu button - ALWAYS VIBRANT AMBER */
+.stPopover button *,
+.stPopover button p,
+.stPopover button span,
+.stPopover button div,
+.stPopover button svg,
+[data-testid="stPopover"] button *,
+[data-testid="stPopover"] button p,
+[data-testid="stPopover"] button span,
+[data-testid="stPopover"] button div,
+[data-testid="stPopover"] button svg,
+[data-testid="stPopover"] [data-testid="stBaseButton-secondary"] p,
+[data-testid="stPopover"] [data-testid="stBaseButton-secondary"] span,
+[data-testid="stPopover"] [data-testid="stBaseButton-secondary"] div,
+[data-testid="stPopover"] [data-testid="stBaseButton-secondary"] svg,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] button *,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] button p,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] button span,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] button div,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] button svg,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button *,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button p,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button span,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button div,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button svg {{
   color: #ffd166 !important;
   fill: #ffd166 !important;
-  font-size: 1.25rem !important;
+  stroke: #ffd166 !important;
+  font-size: 0.95rem !important;
   font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9) !important;
 }}
 
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopoverButton"]:hover,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) .stPopover > button:hover {{
-  background: var(--amber) !important;
-  border-color: var(--amber) !important;
-  box-shadow: 0 4px 14px rgba(217, 143, 43, 0.45) !important;
-  transform: translateY(-2px) !important;
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) .stPopover > button:hover,
+.stPopover button:hover,
+[data-testid="stPopover"] button:hover,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:hover {{
+  background: #ffd166 !important;
+  border-color: #ffd166 !important;
+  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.55) !important;
+  transform: translateY(-1px) !important;
 }}
 
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover *,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover p,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover span,
 div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover div,
-div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover svg {{
-  color: var(--on-amber) !important;
-  fill: var(--on-amber) !important;
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) [data-testid="stPopover"] > button:hover svg,
+.stPopover button:hover *,
+.stPopover button:hover p,
+.stPopover button:hover span,
+.stPopover button:hover div,
+.stPopover button:hover svg,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:hover *,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:hover p,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:hover span,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:hover div,
+div[data-testid="stHorizontalBlock"]:has(.wi-header-anchor) button:hover svg {{
+  color: #1a0f07 !important;
+  fill: #1a0f07 !important;
+  stroke: #1a0f07 !important;
+  text-shadow: none !important;
 }}
 
 /* Header Toggle Label (Visible in both modes: keeps dark mode color #f3e3c8, changes to #ffd166 in light mode) */
