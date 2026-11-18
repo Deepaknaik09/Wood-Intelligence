@@ -614,102 +614,23 @@ def generate_pattern_artwork(furniture_id: str, pattern: dict, wood_info: dict, 
 
 
 # =============================================================================
-# VIEW 1: 3D STUDIO PRODUCT RENDER (Photorealistic Studio Cyclorama)
+# VIEW 1: 3D STUDIO PRODUCT RENDER (Photorealistic Studio Master)
 # =============================================================================
 def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str, pattern_index: int = 0, api_key: str = None):
-    W, H = 1200, 840
-    bg_cyclorama = (248, 249, 251)
-    im = Image.new("RGB", (W, H), bg_cyclorama)
-    draw = ImageDraw.Draw(im)
-
-    w_id = wood_info.get("id", "timber") if wood_info else "timber"
-    w_name = wood_info.get("name", "Solid Hardwood") if wood_info else "Solid Hardwood"
-    w_sci = wood_info.get("scientificName", "") if wood_info else ""
-    f_name = furniture_item.get("name", "Woodwork Piece")
-    p_title = pattern.get("title", "Studio Design Pattern")
-    p_badge = pattern.get("badge", "Mastercraft")
-
-    # 1. Neutral Studio Cyclorama Backdrop with Radial Spotlight
-    for y in range(H):
-        factor = (y / H) * 0.04
-        r = int(248 * (1 - factor))
-        g = int(249 * (1 - factor))
-        b = int(251 * (1 - factor))
-        draw.line([(0, y), (W, y)], fill=(r, g, b))
-
-    spot_center_x, spot_center_y = W // 2, H // 2 - 20
-    glow_overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    glow_draw = ImageDraw.Draw(glow_overlay)
-    for r in range(450, 0, -30):
-        alpha = int(14 * (1 - r / 450))
-        glow_draw.ellipse(
-            [spot_center_x - r, spot_center_y - int(r * 0.7),
-             spot_center_x + r, spot_center_y + int(r * 0.7)],
-            fill=(255, 255, 255, alpha)
-        )
-    im = Image.alpha_composite(im.convert("RGBA"), glow_overlay).convert("RGB")
-    draw = ImageDraw.Draw(im)
-
-    # 2. Outer Technical Border
-    draw.rectangle([20, 18, W - 20, H - 18], outline=(215, 220, 230), width=1)
-    draw.rectangle([24, 22, W - 24, H - 22], outline=(232, 236, 244), width=1)
-
-    # 3. Load & Composite Authentic High-Res Photograph (AI Generated or Photographic Master)
+    """
+    Renders the photorealistic master view: an authentic high-resolution studio photograph
+    or an on-demand Generative AI render tailored to the authentic timber species.
+    """
     ai_img, ai_provider = generate_ai_furniture_image(furniture_item, pattern, wood_info, api_key=api_key)
     if ai_img is not None:
         photo = ai_img
-        w_source_tag = f"✨ AI {ai_provider}"
     else:
         photo_path = get_pattern_photo(furniture_item.get("id", "piece"), pattern, pattern_index)
         photo = Image.open(photo_path).convert("RGB")
+        w_id = wood_info.get("id", "timber") if wood_info else "timber"
         photo = apply_species_photographic_grading(photo, w_id)
-        w_source_tag = "📸 4500K Studio Photometrics"
 
-    # Header Strip
-    f_h1 = get_font(18, bold=True)
-    f_h2 = get_font(13, bold=False)
-    f_badge = get_font(11, bold=True, mono=True)
-    f_tag = get_font(11, bold=True)
-
-    draw.rectangle([35, 30, W - 35, 84], fill=(255, 255, 255), outline=(218, 224, 234), width=1)
-    draw.line([(35, 30), (W - 35, 30)], fill=(217, 143, 43), width=3)
-
-    draw.text((50, 38), f"{f_name.upper()} — PHOTOREALISTIC DESIGN MASTER RENDER", fill=(25, 30, 42), font=f_h1)
-    draw.text((50, 62), f"Design Pattern: {p_title} · Style: [{p_badge}] · Crafted in Authentic {w_name} ({w_sci})", fill=(100, 108, 120), font=f_h2)
-
-    draw.rectangle([W - 270, 38, W - 48, 76], fill=(245, 248, 255), outline=(180, 200, 235), width=1)
-    draw.text((W - 258, 44), w_source_tag, fill=(35, 80, 150), font=f_badge)
-    draw.text((W - 258, 59), f"Solid {w_name} Grain & Specular Finish", fill=(90, 120, 170), font=f_tag)
-
-    photo_fit = photo.copy()
-    photo_fit.thumbnail((960, 560), Image.Resampling.LANCZOS)
-    px = (W - photo_fit.width) // 2
-    py = 100 + (610 - photo_fit.height) // 2
-
-    # Clean presentation with crisp studio matting
-    draw.rectangle([px - 2, py - 2, px + photo_fit.width + 1, py + photo_fit.height + 1], fill=(255, 255, 255), outline=(218, 224, 234), width=1)
-    im.paste(photo_fit, (px, py))
-
-    # 5. Bottom Architectural Feature Cards
-    card_y = H - 110
-    f_lbl = get_font(10, bold=True)
-    f_val = get_font(12, bold=True)
-
-    draw.rectangle([35, card_y, 380, H - 32], fill=(255, 255, 255), outline=(220, 225, 235), width=1)
-    draw.text((48, card_y + 10), "FINISHED CRAFT DIMENSIONS", fill=(175, 110, 25), font=f_lbl)
-    draw.text((48, card_y + 26), pattern.get("dimensions", "Standard Metric Proportions")[:38], fill=(30, 35, 45), font=f_val)
-
-    draw.rectangle([395, card_y, 790, H - 32], fill=(255, 255, 255), outline=(220, 225, 235), width=1)
-    draw.text((408, card_y + 10), f"TIMBER SPECIES: {w_name.upper()}", fill=(45, 120, 55), font=f_lbl)
-    mor_val = wood_info.get("mor", 90.0) if wood_info else 90.0
-    janka_val = wood_info.get("hardness", 5000) if wood_info else 5000
-    draw.text((408, card_y + 26), f"Flexural MOR: {mor_val:.1f} MPa | Hardness: {janka_val} N", fill=(30, 35, 45), font=f_val)
-
-    draw.rectangle([805, card_y, W - 35, H - 32], fill=(255, 255, 255), outline=(220, 225, 235), width=1)
-    draw.text((818, card_y + 10), "RECOMMENDED PROTECTIVE COATING", fill=(60, 95, 165), font=f_lbl)
-    draw.text((818, card_y + 26), pattern.get("recommended_finish", "Natural Hardwax Oil")[:38], fill=(30, 35, 45), font=f_val)
-
-    im.save(output_path, "PNG", optimize=True)
+    photo.save(output_path, "PNG", optimize=True)
     return output_path
 
 

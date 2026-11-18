@@ -338,80 +338,73 @@ def render_recommendations_modal(furniture_id: str):
             is_best = rec_item["is_best_match"]
 
             card_border = "var(--good)" if is_best else "var(--line)"
-            badge_bg = "var(--good)" if is_best else "var(--amber-soft)"
+            badge_bg = "var(--good)" if is_best else "rgba(120, 130, 145, 0.12)"
             badge_color = "var(--on-amber)" if is_best else "var(--ink)"
             badge_label = "OPTIMAL STRUCTURAL MATCH" if is_best else f"RANK #{rec_item['rank']}"
             score_bar_color = "var(--good)" if score >= 90 else ("var(--warn)" if score >= 80 else "var(--amber)")
             cost_stars = f"Tier {wood['costTier']}/5"
 
             st.markdown(uhtml(f"""
-            <div style="background:var(--surface);border:1.5px solid {card_border};border-left:4px solid {'var(--good)' if is_best else 'var(--amber)'};border-radius:8px;padding:1.1rem 1.3rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.65rem;">
+            <div style="background:var(--surface);border:1px solid {card_border};border-radius:10px;padding:1.25rem 1.4rem;margin-bottom:0.85rem;box-shadow:0 2px 10px rgba(0,0,0,0.03);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.75rem;">
                 <div>
-                  <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-                    <span style="font-size:1.3rem;font-weight:800;color:var(--ink);">{wood['name']}</span>
-                    <span style="font-style:italic;color:var(--muted);font-size:0.9rem;">({wood['scientificName']})</span>
-                    <span style="background:{badge_bg};color:{badge_color};font-size:0.68rem;font-weight:800;padding:0.22rem 0.6rem;border-radius:4px;letter-spacing:0.04em;">
+                  <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+                    <span style="font-size:1.35rem;font-weight:700;color:var(--ink);letter-spacing:-0.02em;">{wood['name']}</span>
+                    <span style="font-style:italic;color:var(--muted);font-size:0.88rem;">({wood['scientificName']})</span>
+                    <span style="background:{badge_bg};color:{badge_color};font-size:0.68rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:4px;letter-spacing:0.04em;">
                       {badge_label}
                     </span>
                   </div>
-                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem;">
-                    <strong>Weight Class:</strong> {wood['weightClass']} &nbsp;|&nbsp; <strong>Cost Class:</strong> {cost_stars} &nbsp;|&nbsp; <strong>Regional Availability:</strong> {wood['availabilityInIndia']}/10
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem;">
+                    Weight: <strong>{wood['weightClass']}</strong> &nbsp;·&nbsp; Cost: <strong>{cost_stars}</strong> &nbsp;·&nbsp; Availability: <strong>{wood['availabilityInIndia']}/10</strong>
                   </div>
                 </div>
                 <div style="text-align:right;min-width:110px;">
-                  <div style="font-size:1.75rem;font-weight:800;color:{score_bar_color};font-family:'JetBrains Mono',monospace;line-height:1;">
-                    {score:.1f}<span style="font-size:0.9rem;color:var(--muted);">/100</span>
+                  <div style="font-size:1.85rem;font-weight:800;color:{score_bar_color};font-family:'JetBrains Mono',monospace;line-height:1;">
+                    {score:.1f}<span style="font-size:0.85rem;color:var(--muted);font-weight:500;">/100</span>
                   </div>
-                  <div style="font-size:0.65rem;font-weight:700;color:var(--amber);text-transform:uppercase;margin-top:2px;">Suitability Index</div>
+                  <div style="font-size:0.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:3px;">Suitability Index</div>
                 </div>
               </div>
 
-              <!-- Score Fill Bar -->
-              <div style="width:100%;height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:0.3rem 0;">
-                <div style="width:{min(100.0, score)}%;height:100%;background:{score_bar_color};border-radius:3px;"></div>
+              <!-- Score Fill Line -->
+              <div style="width:100%;height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:0.25rem 0 0.85rem 0;">
+                <div style="width:{min(100.0, score)}%;height:100%;background:{score_bar_color};border-radius:2px;"></div>
               </div>
 
               <!-- Key Engineering Stats Grid -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));gap:0.45rem;margin:0.75rem 0;background:var(--surface-2);padding:0.7rem 0.85rem;border-radius:10px;border:1px solid var(--line);">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:0.5rem;margin:0.75rem 0;background:var(--surface-2);padding:0.8rem 1rem;border-radius:8px;border:1px solid var(--line);">
                 <div>
-                  <div style="font-size:0.65rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Bending MOR</div>
-                  <div style="font-size:0.9rem;font-weight:700;color:var(--ink);">{wood['mor']:.1f} MPa</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Bending MOR</div>
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">{wood['mor']:.1f} MPa</div>
                 </div>
                 <div>
-                  <div style="font-size:0.65rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Hardness (Janka)</div>
-                  <div style="font-size:0.9rem;font-weight:700;color:var(--ink);">{wood['hardness']} N</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Hardness (Janka)</div>
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">{wood['hardness']} N</div>
                 </div>
                 <div>
-                  <div style="font-size:0.65rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Stability Score</div>
-                  <div style="font-size:0.9rem;font-weight:700;color:var(--ink);">{wood['shrinkage']['stability_score']}/10</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Stability Score</div>
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">{wood['shrinkage']['stability_score']}/10</div>
                 </div>
                 <div>
-                  <div style="font-size:0.65rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Workability</div>
-                  <div style="font-size:0.9rem;font-weight:700;color:var(--ink);">{wood['workability']}/10</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Workability</div>
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">{wood['workability']}/10</div>
                 </div>
                 <div>
-                  <div style="font-size:0.65rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Finish Quality</div>
-                  <div style="font-size:0.9rem;font-weight:700;color:var(--ink);">{wood['finishQuality']}/10</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Finish Quality</div>
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">{wood['finishQuality']}/10</div>
                 </div>
                 <div>
-                  <div style="font-size:0.65rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Durability</div>
-                  <div style="font-size:0.9rem;font-weight:700;color:var(--ink);">{wood['durability']}/10</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Durability</div>
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">{wood['durability']}/10</div>
                 </div>
               </div>
 
-              <!-- Why it suits this piece -->
-              <div style="background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:9px;padding:0.65rem 0.85rem;margin-bottom:0.55rem;font-size:0.82rem;color:var(--ink);line-height:1.5;">
-                <strong style="color:var(--amber);">Why this wood suits {active_item['name']}:</strong>
-                <ul style="margin:0.25rem 0 0 1.1rem;padding:0;color:var(--ink);">
-                  {"".join([f"<li>{r}</li>" for r in reasons])}
-                </ul>
-              </div>
-
-              <!-- Engineering Trade-offs -->
-              <div class="tradeoffs-callout-box" style="margin-bottom:0.65rem;">
-                <strong style="color:var(--amber);">Engineering Considerations &amp; Trade-offs:</strong>
-                <div style="margin-top:0.18rem;color:var(--ink);line-height:1.45;">{" • ".join(tradeoffs)}</div>
+              <!-- Editorial Rationale & Trade-offs -->
+              <div style="margin-top:0.75rem;padding-top:0.65rem;border-top:1px solid var(--line);font-size:0.83rem;color:var(--ink);line-height:1.55;">
+                <div style="font-weight:600;color:var(--ink);margin-bottom:0.25rem;">Architectural Rationale:</div>
+                <div style="color:var(--muted);margin-bottom:0.45rem;">{" · ".join(reasons)}</div>
+                <div style="font-size:0.78rem;color:var(--muted);"><strong>Fabrication Considerations:</strong> {" · ".join(tradeoffs)}</div>
               </div>
             </div>
             """), unsafe_allow_html=True)
@@ -462,31 +455,28 @@ def render_recommendations_modal(furniture_id: str):
             st.rerun()
 
         st.markdown(uhtml(f"""
-        <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:8px;padding:1rem 1.3rem;margin:0.85rem 0;box-shadow:0 2px 8px rgba(217,143,43,0.08);">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.6rem;">
-            <div>
-              <span style="font-size:0.72rem;color:var(--amber);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">ACTIVE CRAFTING TIMBER PAIRING</span>
-              <div style="font-size:1.35rem;font-weight:800;color:var(--ink);">{explored_wood['name']} <span style="font-size:0.9rem;font-weight:500;color:var(--muted);font-style:italic;">({explored_wood['scientificName']})</span></div>
-            </div>
-            <div style="text-align:right;">
-              <span style="background:var(--amber);color:var(--on-amber);font-size:0.72rem;font-weight:800;padding:0.25rem 0.7rem;border-radius:4px;">
-                Density: {explored_wood['density']} kg/m³ | Hardness: {explored_wood['hardness']} N
-              </span>
-            </div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem 1.3rem;margin:0.85rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+          <div>
+            <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Active Timber Specification</div>
+            <div style="font-size:1.35rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;">{explored_wood['name']} <span style="font-size:0.9rem;font-weight:400;color:var(--muted);font-style:italic;">({explored_wood['scientificName']})</span></div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:0.2rem;">{explored_wood['joineryTip']}</div>
           </div>
-          
-          <div style="background:var(--surface);border-left:3px solid var(--good);border-radius:6px;padding:0.6rem 0.9rem;margin-top:0.7rem;font-size:0.82rem;color:var(--ink);line-height:1.5;">
-            <strong style="color:var(--good);">Species Workability &amp; Joinery Specification:</strong><br/>
-            {explored_wood['joineryTip']}
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <span style="background:var(--surface-2);border:1px solid var(--line);color:var(--ink);font-size:0.75rem;font-weight:600;padding:0.35rem 0.75rem;border-radius:6px;">
+              Density: {explored_wood['density']} kg/m³
+            </span>
+            <span style="background:var(--surface-2);border:1px solid var(--line);color:var(--ink);font-size:0.75rem;font-weight:600;padding:0.35rem 0.75rem;border-radius:6px;">
+              Hardness: {explored_wood['hardness']} N
+            </span>
           </div>
         </div>
         """), unsafe_allow_html=True)
 
         st.markdown(uhtml(f"""
         <div style="margin:1rem 0 0.6rem 0;">
-          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;">Curated Design Patterns for {active_item['name']}</h4>
+          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;letter-spacing:-0.02em;">Curated Architectural Patterns for {active_item['name']}</h4>
           <p style="font-size:0.82rem;color:var(--muted);margin:0;">
-            Architectural joinery methods, finished proportions, structural safety margins, and workshop blueprints tailored exclusively for {active_item['name']} crafted in {explored_wood['name']}.
+            Bespoke joinery methods, finished proportions, and structural safety margins tailored exclusively for solid {explored_wood['name']}.
           </p>
         </div>
         """), unsafe_allow_html=True)
@@ -580,50 +570,43 @@ def render_recommendations_modal(furniture_id: str):
 
         for p_idx, pat in enumerate(furniture_patterns):
             st.markdown(uhtml(f"""
-            <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:0.6rem;box-shadow:0 3px 12px rgba(0,0,0,0.05);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.7rem;">
+            <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.6rem;margin-bottom:1.25rem;box-shadow:0 3px 12px rgba(0,0,0,0.03);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.85rem;">
                 <div>
-                  <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-                    <span style="font-size:1.25rem;font-weight:800;color:var(--ink);font-family:'Cinzel',serif;">{pat['title']}</span>
-                    <span style="background:var(--amber-soft);color:var(--ink);border:1px solid var(--amber);font-size:0.7rem;font-weight:700;padding:0.18rem 0.6rem;border-radius:4px;letter-spacing:0.04em;">{pat['badge']}</span>
+                  <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+                    <span style="font-size:1.35rem;font-weight:700;color:var(--ink);letter-spacing:-0.02em;">{pat['title']}</span>
+                    <span style="background:var(--surface-2);color:var(--ink);border:1px solid var(--line);font-size:0.68rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:4px;letter-spacing:0.05em;text-transform:uppercase;">{pat['badge']}</span>
                   </div>
-                  <p style="font-size:0.84rem;color:var(--muted);margin:0.35rem 0 0 0;line-height:1.5;">
+                  <p style="font-size:0.85rem;color:var(--muted);margin:0.35rem 0 0 0;line-height:1.55;">
                     {pat['description']}
                   </p>
                 </div>
               </div>
 
-              <!-- Blueprint Specs Grid -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:0.65rem;margin:0.85rem 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0.8rem 0.95rem;">
+              <!-- Minimalist Architectural Spec Grid -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:0.75rem;margin:0.85rem 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0.9rem 1.1rem;">
                 <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Finished Dimensions</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['dimensions']}</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Proportions</div>
+                  <div style="font-size:0.88rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['dimensions']}</div>
                 </div>
                 <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Recommended Joinery</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--good);margin-top:0.15rem;">{pat['recommended_joinery']}</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Joinery System</div>
+                  <div style="font-size:0.88rem;font-weight:700;color:var(--good);margin-top:0.15rem;">{pat['recommended_joinery']}</div>
                 </div>
                 <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Protective Finish</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['recommended_finish']}</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Surface Finish</div>
+                  <div style="font-size:0.88rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['recommended_finish']}</div>
                 </div>
                 <div>
-                  <div style="font-size:0.68rem;color:var(--amber);font-weight:700;text-transform:uppercase;">Design Load Capacity</div>
-                  <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['load_capacity']}</div>
+                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Dynamic Rating</div>
+                  <div style="font-size:0.88rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['load_capacity']}</div>
                 </div>
               </div>
 
-              <!-- Timber Pairing Suitability & Structural Margin -->
-              <div style="background:var(--surface-2);border-left:4px solid var(--good);padding:0.65rem 0.9rem;border-radius:0 6px 6px 0;margin-bottom:0.6rem;font-size:0.81rem;color:var(--ink);line-height:1.45;">
-                <strong style="color:var(--good);">Timber Engineering Analysis ({pat['wood_pairing_name']}):</strong><br/>
-                {pat['wood_pairing_note']}<br/>
-                <span style="font-size:0.77rem;color:var(--muted);">{pat['wood_stability_note']}</span>
-              </div>
-
-              <!-- Technical Workshop Blueprint -->
-              <div style="background:var(--amber-soft);border-left:4px solid var(--amber);padding:0.65rem 0.9rem;border-radius:0 6px 6px 0;font-size:0.81rem;color:var(--ink);line-height:1.45;">
-                <strong style="color:var(--amber);">Master Workshop Blueprint &amp; Fabrication Tip:</strong><br/>
-                {pat['blueprint_tips']}
+              <!-- Editorial Timber & Workshop Insights -->
+              <div style="margin-top:0.75rem;padding-top:0.65rem;border-top:1px solid var(--line);font-size:0.82rem;color:var(--ink);line-height:1.55;">
+                <div><strong>Engineering Compatibility:</strong> {pat['wood_pairing_note']}</div>
+                <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem;"><strong>Fabrication Guideline:</strong> {pat['blueprint_tips']}</div>
               </div>
             </div>
             """), unsafe_allow_html=True)
@@ -661,22 +644,13 @@ def render_recommendations_modal(furniture_id: str):
                 )
 
                 st.markdown(uhtml(f"""
-                <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:10px;padding:0.75rem 1rem;margin:0.4rem 0 0.6rem 0;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;">
-                    <div>
-                      <span style="font-size:0.75rem;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:0.06em;">
-                        📸 Photorealistic Master Design Render
-                      </span>
-                      <div style="font-size:1.05rem;font-weight:800;color:var(--ink);">
-                        {pat['title']} · Crafted in Authentic {explored_wood['name']}
-                      </div>
-                    </div>
-                    <div>
-                      <span style="background:var(--good);color:white;font-size:0.75rem;font-weight:700;padding:0.25rem 0.75rem;border-radius:4px;">
-                        ✓ High-Resolution 4500K Studio Render
-                      </span>
-                    </div>
-                  </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin:0.75rem 0 0.35rem 0;padding:0 0.2rem;">
+                  <span style="font-size:0.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">
+                    Architectural Studio Render · Solid {explored_wood['name']}
+                  </span>
+                  <span style="font-size:0.72rem;color:var(--good);font-weight:600;">
+                    Photometric Studio Master
+                  </span>
                 </div>
                 """), unsafe_allow_html=True)
 
@@ -685,7 +659,7 @@ def render_recommendations_modal(furniture_id: str):
                 if os.path.exists(studio_info["path"]):
                     st.image(
                         studio_info["path"],
-                        caption=f"📸 {pat['title']} ({active_item['name']}) crafted in Solid {explored_wood['name']}",
+                        caption=f"{pat['title']} ({active_item['name']}) crafted in Solid {explored_wood['name']}",
                         width="stretch"
                     )
 
@@ -693,7 +667,7 @@ def render_recommendations_modal(furniture_id: str):
                     with btn_c1:
                         with open(studio_info["path"], "rb") as f_img:
                             st.download_button(
-                                label=f"💾 Download Photorealistic Master Render",
+                                label=f"Download High-Res Master Render",
                                 data=f_img.read(),
                                 file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_master.png",
                                 mime="image/png",

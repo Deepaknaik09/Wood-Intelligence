@@ -30,3 +30,8 @@ desktop.ini
 .vscode/
 .idea/
 *.log
+
+# Environment variables & secrets
+.env
+*.env
+.env.*
