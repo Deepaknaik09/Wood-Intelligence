@@ -221,35 +221,59 @@ def generate_ai_furniture_image(
     if not key:
         return None, "No API key configured"
 
-    # 1. Google Gemini / Imagen 3 API
-    if key.startswith("AIza") or (len(key) == 39 and not key.startswith("sk-")):
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={key}"
-            payload = {
-                "instances": [{"prompt": prompt}],
-                "parameters": {
-                    "sampleCount": 1,
-                    "aspectRatio": "1:1",
-                    "outputMimeType": "image/jpeg"
-                }
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                result = json.loads(resp.read().decode("utf-8"))
-                predictions = result.get("predictions", [])
-                if predictions and "bytesBase64Encoded" in predictions[0]:
-                    img_data = base64.b64decode(predictions[0]["bytesBase64Encoded"])
-                    im = Image.open(io.BytesIO(img_data)).convert("RGB")
-                    return im, "Google Imagen 3"
-        except urllib.error.HTTPError as e:
-            err_body = e.read().decode("utf-8", errors="ignore")
-            return None, f"Google Imagen API ({e.code}): {err_body[:100]}"
-        except Exception as e:
-            return None, f"Google Imagen error: {e}"
+    # 1. Google Gemini / Imagen API
+    if key.startswith("AIza") or key.startswith("AQ.") or (len(key) in (39, 53) and not key.startswith("sk-")):
+        # Try Imagen and Gemini Image models
+        gemini_image_models = ["imagen-3.0-generate-002", "gemini-2.5-flash-image", "gemini-3.1-flash-image", "gemini-3-pro-image"]
+        last_g_err = ""
+        for g_mod in gemini_image_models:
+            try:
+                if "imagen" in g_mod:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_mod}:predict?key={key}"
+                    payload = {
+                        "instances": [{"prompt": prompt}],
+                        "parameters": {
+                            "sampleCount": 1,
+                            "aspectRatio": "1:1",
+                            "outputMimeType": "image/jpeg"
+                        }
+                    }
+                else:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_mod}:generateContent?key={key}"
+                    payload = {
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": {"responseModalities": ["IMAGE", "TEXT"]}
+                    }
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    result = json.loads(resp.read().decode("utf-8"))
+                    # Check Imagen format
+                    predictions = result.get("predictions", [])
+                    if predictions and "bytesBase64Encoded" in predictions[0]:
+                        img_data = base64.b64decode(predictions[0]["bytesBase64Encoded"])
+                        im = Image.open(io.BytesIO(img_data)).convert("RGB")
+                        return im, f"Google Imagen 3 ({g_mod})"
+                    # Check Gemini candidates format
+                    candidates = result.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        for p in parts:
+                            if "inlineData" in p and "data" in p["inlineData"]:
+                                img_data = base64.b64decode(p["inlineData"]["data"])
+                                im = Image.open(io.BytesIO(img_data)).convert("RGB")
+                                return im, f"Google Gemini ({g_mod})"
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode("utf-8", errors="ignore")
+                if e.code == 429 or "quota" in err_body.lower():
+                    return None, "Google AI Studio: Quota limit is 0 on the Free Tier for direct image generation. Link pay-as-you-go billing in Google AI Studio to unlock live Imagen generation."
+                last_g_err = f"Google API ({e.code}): {err_body[:100]}"
+            except Exception as e:
+                last_g_err = f"Google error: {e}"
+        return None, last_g_err
 
     # 2. OpenAI Image Generation API
     if key.startswith("sk-"):

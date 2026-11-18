@@ -554,7 +554,8 @@ def render_recommendations_modal(furniture_id: str):
                     pass
 
         has_ai_key = bool(active_ai_key and len(active_ai_key) > 8)
-        ai_provider = "Google Imagen 3" if (active_ai_key.startswith("AIza") or len(active_ai_key) == 39) else ("OpenAI Image API" if active_ai_key.startswith("sk-") else "Cloud Generative AI")
+        is_gemini = active_ai_key.startswith("AIza") or active_ai_key.startswith("AQ.") or len(active_ai_key) in (39, 53)
+        ai_provider = "Google AI Studio (Gemini)" if is_gemini else ("OpenAI Image API" if active_ai_key.startswith("sk-") else "Cloud Generative AI")
 
         with st.expander(
             f"Visualizer Studio Engine: {'Generative AI Active (' + ai_provider + ')' if has_ai_key else 'Studio Master Photography (Add API Key for Generative AI)'}",
@@ -581,7 +582,8 @@ def render_recommendations_modal(furniture_id: str):
                     st.session_state["ai_image_api_key"] = key_input_val.strip()
                     try:
                         env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-                        env_key_name = "GEMINI_API_KEY" if key_input_val.strip().startswith("AIza") or len(key_input_val.strip()) == 39 else "OPENAI_API_KEY"
+                        is_g_input = key_input_val.strip().startswith("AIza") or key_input_val.strip().startswith("AQ.") or len(key_input_val.strip()) in (39, 53)
+                        env_key_name = "GEMINI_API_KEY" if is_g_input else "OPENAI_API_KEY"
                         with open(env_path, "a", encoding="utf-8") as f_app:
                             f_app.write(f"\n{env_key_name}={key_input_val.strip()}\n")
                     except Exception:
