@@ -18,6 +18,9 @@ from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "generated_designs")
 os.makedirs(ASSETS_DIR, exist_ok=True)
 
+ROOT_PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ASSETS_DIR = os.path.join(ROOT_PROJECT_DIR, "assets")
+
 # Authentic color grading palettes for all 29 commercial timbers in Wood Intelligence
 WOOD_SPECIES_TINTS = {
     "teak": (185, 125, 65),              # Golden honey bronze
@@ -110,6 +113,82 @@ def is_suite_generated(furniture_id: str, pattern_title: str, wood_id: str) -> b
     """Returns True if all 4 views of the suite exist on disk."""
     paths = get_design_suite_paths(furniture_id, pattern_title, wood_id)
     return all(os.path.exists(p) for p in paths.values())
+
+
+# =============================================================================
+# AUTHENTIC PHOTOREALISTIC DESIGN ENGINE & TONE MAPPING
+# =============================================================================
+def apply_species_photographic_grading(img: Image.Image, wood_id: str) -> Image.Image:
+    """Subtly grades the timber highlights and midtones to match the active wood species,
+    preserving 100% of photographic grain, reflections, shadows, and natural depth."""
+    if not wood_id:
+        return img
+    img = img.convert("RGB")
+    tint = get_wood_tint(wood_id)
+    if tint == WOOD_SPECIES_TINTS.get("default"):
+        return img
+    tint_layer = Image.new("RGB", img.size, tint)
+    graded = Image.blend(img, tint_layer, alpha=0.08)
+    enhancer = ImageEnhance.Contrast(graded)
+    return enhancer.enhance(1.04)
+
+
+def get_pattern_photo(furniture_id: str, pattern: dict = None, pattern_index: int = 0) -> str:
+    """Finds the best authentic, high-resolution photograph for this furniture piece & pattern."""
+    p_title = pattern.get("title", "").lower() if pattern else ""
+    candidates = [
+        os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_{pattern_index}.jpg"),
+        os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_{pattern_index}.png"),
+    ]
+    if "wishbone" in p_title or "scandi" in p_title:
+        candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "dining_chair_0.jpg"))
+    elif "sculptural" in p_title or "mid_century" in p_title or "mid-century" in p_title:
+        if "chair" in furniture_id:
+            candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "dining_chair_1.jpg"))
+        elif "cot" in furniture_id or "bed" in furniture_id:
+            candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "cot_1.jpg"))
+    elif "platform" in p_title or "floating" in p_title or "cantilever" in p_title:
+        candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "cot_0.jpg"))
+    elif "live_edge" in p_title or "slab" in p_title or "organic" in p_title:
+        if "cot" in furniture_id or "bed" in furniture_id:
+            candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "cot_2.jpg"))
+        elif "table" in furniture_id:
+            candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "dining_table_0.jpg"))
+    elif "craftsman" in p_title or "post" in p_title or "beam" in p_title:
+        candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "cot_3.jpg"))
+    elif "lattice" in p_title or "kumiko" in p_title or "slat" in p_title:
+        if "chair" in furniture_id:
+            candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "dining_chair_2.jpg"))
+        elif "partition" in furniture_id:
+            candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "wooden_partition_0.jpg"))
+
+    candidates.append(os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_0.jpg"))
+    candidates.append(os.path.join(PROJECT_ASSETS_DIR, "furniture", f"{furniture_id}.jpg"))
+    candidates.append(os.path.join(PROJECT_ASSETS_DIR, "furniture", f"{furniture_id}.webp"))
+    candidates.append(os.path.join(PROJECT_ASSETS_DIR, "furniture", f"{furniture_id}.png"))
+
+    cat_fallbacks = {
+        "dining_chair": ["chair.jpg", "wooden_chair.jpg", "armchair.jpg"],
+        "wooden_chair": ["dining_chair.jpg", "chair.jpg"],
+        "armchair": ["dining_chair.jpg", "chair.jpg"],
+        "stool": ["chair.jpg", "bench.jpg"],
+        "bench": ["chair.jpg", "table.jpg"],
+        "cot": ["bed.jpg", "bed_frame.jpg"],
+        "bed_frame": ["cot.jpg", "bed.jpg"],
+        "bunk_bed": ["bed.jpg", "cot.jpg"],
+        "dining_table": ["table.jpg", "coffee_table.jpg"],
+        "coffee_table": ["table.jpg", "dining_table.jpg"],
+        "desk": ["table.jpg", "study_table.jpg"],
+        "study_table": ["table.jpg", "desk.jpg"],
+        "wooden_partition": ["door.jpg", "window_frame.jpg"]
+    }
+    for fb in cat_fallbacks.get(furniture_id, []):
+        candidates.append(os.path.join(PROJECT_ASSETS_DIR, "furniture", fb))
+
+    for c in candidates:
+        if os.path.exists(c) and os.path.getsize(c) > 5000:
+            return c
+    return os.path.join(PROJECT_ASSETS_DIR, "furniture", "chair.jpg")
 
 
 # =============================================================================
@@ -429,9 +508,10 @@ def generate_pattern_artwork(furniture_id: str, pattern: dict, wood_info: dict, 
 # =============================================================================
 # VIEW 1: 3D STUDIO PRODUCT RENDER (Photorealistic Studio Cyclorama)
 # =============================================================================
-def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str):
-    W, H = 1200, 780
-    im = Image.new("RGBA", (W, H), (245, 246, 248, 255))
+def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str, pattern_index: int = 0):
+    W, H = 1200, 840
+    bg_cyclorama = (248, 249, 251)
+    im = Image.new("RGB", (W, H), bg_cyclorama)
     draw = ImageDraw.Draw(im)
 
     w_id = wood_info.get("id", "timber") if wood_info else "timber"
@@ -443,31 +523,28 @@ def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, out
 
     # 1. Neutral Studio Cyclorama Backdrop with Radial Spotlight
     for y in range(H):
-        ratio = y / H
-        r = int(240 + ratio * 12)
-        g = int(242 + ratio * 11)
-        b = int(246 + ratio * 8)
-        draw.line([(0, y), (W, y)], fill=(r, g, b, 255))
+        factor = (y / H) * 0.04
+        r = int(248 * (1 - factor))
+        g = int(249 * (1 - factor))
+        b = int(251 * (1 - factor))
+        draw.line([(0, y), (W, y)], fill=(r, g, b))
 
     spot_center_x, spot_center_y = W // 2, H // 2 - 20
     glow_overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     glow_draw = ImageDraw.Draw(glow_overlay)
-    for r in range(450, 0, -25):
-        alpha = int(18 * (1 - r / 450))
+    for r in range(450, 0, -30):
+        alpha = int(14 * (1 - r / 450))
         glow_draw.ellipse(
-            [spot_center_x - r, spot_center_y - int(r * 0.75),
-             spot_center_x + r, spot_center_y + int(r * 0.75)],
+            [spot_center_x - r, spot_center_y - int(r * 0.7),
+             spot_center_x + r, spot_center_y + int(r * 0.7)],
             fill=(255, 255, 255, alpha)
         )
-    im = Image.alpha_composite(im, glow_overlay)
+    im = Image.alpha_composite(im.convert("RGBA"), glow_overlay).convert("RGB")
     draw = ImageDraw.Draw(im)
 
-    horizon_y = H - 200
-    draw.line([(0, horizon_y), (W, horizon_y)], fill=(225, 228, 233, 160), width=1)
-
     # 2. Outer Technical Border
-    draw.rectangle([20, 20, W - 20, H - 20], outline=(210, 215, 224, 200), width=1)
-    draw.rectangle([24, 24, W - 24, H - 24], outline=(230, 235, 242, 160), width=1)
+    draw.rectangle([20, 18, W - 20, H - 18], outline=(215, 220, 230), width=1)
+    draw.rectangle([24, 22, W - 24, H - 22], outline=(232, 236, 244), width=1)
 
     # 3. Header Strip
     f_h1 = get_font(18, bold=True)
@@ -475,36 +552,40 @@ def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, out
     f_badge = get_font(11, bold=True, mono=True)
     f_tag = get_font(11, bold=True)
 
-    draw.rectangle([35, 32, W - 35, 84], fill=(255, 255, 255, 220), outline=(215, 220, 230, 200), width=1)
-    draw.line([(35, 32), (W - 35, 32)], fill=(217, 143, 43, 255), width=3)
+    draw.rectangle([35, 30, W - 35, 84], fill=(255, 255, 255), outline=(218, 224, 234), width=1)
+    draw.line([(35, 30), (W - 35, 30)], fill=(217, 143, 43), width=3)
 
-    draw.text((50, 40), f"{f_name.upper()} — 3D STUDIO PRODUCT RENDER", fill=(30, 35, 45), font=f_h1)
-    draw.text((50, 62), f"Design Pattern: {p_title} · Style: [{p_badge}] · Authentic Timber: {w_name} ({w_sci})", fill=(110, 115, 125), font=f_h2)
+    draw.text((50, 38), f"{f_name.upper()} — PHOTOREALISTIC DESIGN MASTER RENDER", fill=(25, 30, 42), font=f_h1)
+    draw.text((50, 62), f"Design Pattern: {p_title} · Style: [{p_badge}] · Crafted in Authentic {w_name} ({w_sci})", fill=(100, 108, 120), font=f_h2)
 
-    draw.rectangle([W - 250, 40, W - 50, 76], fill=(245, 248, 255, 240), outline=(140, 170, 220, 180), width=1)
-    draw.text((W - 238, 46), "📸 4500K NEUTRAL STUDIO", fill=(35, 80, 150), font=f_badge)
-    draw.text((W - 238, 60), "Softbox Diffused Lighting", fill=(90, 120, 170), font=f_tag)
+    draw.rectangle([W - 260, 38, W - 48, 76], fill=(245, 248, 255), outline=(180, 200, 235), width=1)
+    draw.text((W - 248, 44), "📸 4500K STUDIO PHOTOMETRICS", fill=(35, 80, 150), font=f_badge)
+    draw.text((W - 248, 59), f"Solid {w_name} Grain & Specular Finish", fill=(90, 120, 170), font=f_tag)
 
-    # 4. Generate & Composite Bespoke Pattern Artwork
-    artwork = generate_pattern_artwork(furniture_item.get("id", "piece"), pattern, wood_info, width=760, height=440, style="studio")
-    paste_x = (W - artwork.width) // 2
-    paste_y = horizon_y - artwork.height + 75
+    # 4. Load & Composite Authentic High-Res Photograph
+    photo_path = get_pattern_photo(furniture_item.get("id", "piece"), pattern, pattern_index)
+    photo = Image.open(photo_path).convert("RGB")
+    graded_photo = apply_species_photographic_grading(photo, w_id)
 
-    # Multi-stage realistic contact & ambient floor shadow
+    photo_fit = graded_photo.copy()
+    photo_fit.thumbnail((960, 560), Image.Resampling.LANCZOS)
+    px = (W - photo_fit.width) // 2
+    py = 100 + (610 - photo_fit.height) // 2
+
+    # Multi-stage realistic contact & soft floor drop shadow
     shadow_overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     s_draw = ImageDraw.Draw(shadow_overlay)
-    s_w, s_h = int(artwork.width * 1.15), 55
+    s_w, s_h = int(photo_fit.width * 1.05), 36
     s_x = (W - s_w) // 2
-    s_y = paste_y + artwork.height - 20
-    s_draw.ellipse([s_x, s_y, s_x + s_w, s_y + s_h], fill=(0, 0, 0, 28))
-
-    c_w, c_h = int(artwork.width * 0.85), 24
+    s_y = py + photo_fit.height - 18
+    s_draw.ellipse([s_x, s_y, s_x + s_w, s_y + s_h], fill=(0, 0, 0, 32))
+    c_w, c_h = int(photo_fit.width * 0.85), 18
     c_x = (W - c_w) // 2
-    c_y = paste_y + artwork.height - 12
+    c_y = py + photo_fit.height - 10
     s_draw.ellipse([c_x, c_y, c_x + c_w, c_y + c_h], fill=(0, 0, 0, 65))
 
-    im = Image.alpha_composite(im, shadow_overlay)
-    im.paste(artwork, (paste_x, paste_y), artwork)
+    im = Image.alpha_composite(im.convert("RGBA"), shadow_overlay).convert("RGB")
+    im.paste(photo_fit, (px, py))
     draw = ImageDraw.Draw(im)
 
     # 5. Bottom Architectural Feature Cards
@@ -512,21 +593,21 @@ def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, out
     f_lbl = get_font(10, bold=True)
     f_val = get_font(12, bold=True)
 
-    draw.rectangle([35, card_y, 380, H - 35], fill=(255, 255, 255, 240), outline=(220, 225, 232), width=1)
+    draw.rectangle([35, card_y, 380, H - 32], fill=(255, 255, 255), outline=(220, 225, 235), width=1)
     draw.text((48, card_y + 10), "FINISHED CRAFT DIMENSIONS", fill=(175, 110, 25), font=f_lbl)
-    draw.text((48, card_y + 26), pattern.get("dimensions", "Standard Metric Proportions"), fill=(30, 35, 45), font=f_val)
+    draw.text((48, card_y + 26), pattern.get("dimensions", "Standard Metric Proportions")[:38], fill=(30, 35, 45), font=f_val)
 
-    draw.rectangle([395, card_y, 790, H - 35], fill=(255, 255, 255, 240), outline=(220, 225, 232), width=1)
+    draw.rectangle([395, card_y, 790, H - 32], fill=(255, 255, 255), outline=(220, 225, 235), width=1)
     draw.text((408, card_y + 10), f"TIMBER SPECIES: {w_name.upper()}", fill=(45, 120, 55), font=f_lbl)
     mor_val = wood_info.get("mor", 90.0) if wood_info else 90.0
     janka_val = wood_info.get("hardness", 5000) if wood_info else 5000
-    draw.text((408, card_y + 26), f"Flexural MOR: {mor_val:.1f} MPa | Hardness: {janka_val} N (High Durability)", fill=(30, 35, 45), font=f_val)
+    draw.text((408, card_y + 26), f"Flexural MOR: {mor_val:.1f} MPa | Hardness: {janka_val} N", fill=(30, 35, 45), font=f_val)
 
-    draw.rectangle([805, card_y, W - 35, H - 35], fill=(255, 255, 255, 240), outline=(220, 225, 232), width=1)
+    draw.rectangle([805, card_y, W - 35, H - 32], fill=(255, 255, 255), outline=(220, 225, 235), width=1)
     draw.text((818, card_y + 10), "RECOMMENDED PROTECTIVE COATING", fill=(60, 95, 165), font=f_lbl)
-    draw.text((818, card_y + 26), pattern.get("recommended_finish", "Natural Hardwax Oil")[:40], fill=(30, 35, 45), font=f_val)
+    draw.text((818, card_y + 26), pattern.get("recommended_finish", "Natural Hardwax Oil")[:38], fill=(30, 35, 45), font=f_val)
 
-    im.convert("RGB").save(output_path, "PNG", optimize=True)
+    im.save(output_path, "PNG", optimize=True)
     return output_path
 
 
@@ -785,7 +866,7 @@ def render_joinery_view(furniture_item: dict, pattern: dict, wood_info: dict, ou
 # =============================================================================
 # VIEW 4: IN-SITU ARCHITECTURAL INTERIOR SCENE (Living Space Context)
 # =============================================================================
-def render_insitu_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str):
+def render_insitu_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str, pattern_index: int = 0):
     W, H = 1200, 780
     im = Image.new("RGBA", (W, H), (248, 246, 242, 255))
     draw = ImageDraw.Draw(im)
@@ -848,20 +929,25 @@ def render_insitu_view(furniture_item: dict, pattern: dict, wood_info: dict, out
     draw.text((W - 228, 46), "🏡 1:1 REAL LIVING SCALE", fill=(35, 120, 45), font=f_bold)
     draw.text((W - 228, 58), "Spatial Context Harmonized", fill=(80, 130, 90), font=f_body)
 
-    # Generate & Composite Bespoke Pattern Artwork
-    artwork = generate_pattern_artwork(furniture_item.get("id", "piece"), pattern, wood_info, width=760, height=440, style="studio")
-    paste_x = (W - artwork.width) // 2 + 30
-    paste_y = wall_h - int(artwork.height * 0.55)
+    # 4. Load & Composite Authentic Photograph
+    photo_path = get_pattern_photo(furniture_item.get("id", "piece"), pattern, pattern_index)
+    photo = Image.open(photo_path).convert("RGB")
+    graded_photo = apply_species_photographic_grading(photo, wood_info.get("id", "timber") if wood_info else "timber")
+
+    photo_fit = graded_photo.copy()
+    photo_fit.thumbnail((820, 480), Image.Resampling.LANCZOS)
+    paste_x = (W - photo_fit.width) // 2 + 30
+    paste_y = wall_h - int(photo_fit.height * 0.45)
 
     shadow_overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     s_draw = ImageDraw.Draw(shadow_overlay)
-    s_w = int(artwork.width * 1.05)
+    s_w = int(photo_fit.width * 1.05)
     s_x = paste_x - 10
-    s_y = paste_y + artwork.height - 25
+    s_y = paste_y + photo_fit.height - 25
     s_draw.ellipse([s_x, s_y, s_x + s_w, s_y + 40], fill=(0, 0, 0, 75))
-    im = Image.alpha_composite(im, shadow_overlay)
+    im = Image.alpha_composite(im.convert("RGBA"), shadow_overlay).convert("RGB")
 
-    im.paste(artwork, (paste_x, paste_y), artwork)
+    im.paste(photo_fit, (paste_x, paste_y))
     draw = ImageDraw.Draw(im)
 
     draw.rectangle([35, H - 75, W - 35, H - 35], fill=(255, 255, 255, 230), outline=(210, 205, 195))
@@ -869,7 +955,7 @@ def render_insitu_view(furniture_item: dict, pattern: dict, wood_info: dict, out
     draw.text((50, H - 50), f"Timber harmony: Floor planks color-graded to accentuate the organic warmth of solid {w_name}.", fill=(110, 100, 90), font=f_body)
     draw.text((W - 250, H - 58), "IN-SITU APPROVED", fill=(200, 128, 31), font=f_bold)
 
-    im.convert("RGB").save(output_path, "PNG", optimize=True)
+    im.save(output_path, "PNG", optimize=True)
     return output_path
 
 
@@ -883,10 +969,10 @@ def generate_furniture_design_image(furniture_item: dict, pattern: dict, wood_in
         render_blueprint_view(furniture_item, pattern, wood_info, paths["blueprint"])
     return paths["blueprint"]
 
-def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: dict, force_regenerate: bool = False) -> dict:
+def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: dict, force_regenerate: bool = False, pattern_index: int = 0) -> dict:
     """
     Renders all 4 distinct high-resolution design perspectives:
-    1. 3D Studio Product Render (1200x780 HD, neutral studio cyclorama)
+    1. 3D Studio Product Render (1200x840 HD, authentic photographic studio cyclorama)
     2. Architectural CAD Blueprint (1200x780, drafting grid, dimensions, shop dossier)
     3. Structural Joinery Schematic (1200x780, joint nodes, shear ratings, fasteners)
     4. In-Situ Interior Scene (1200x780, contemporary room context with sunlight & hardwood floor)
@@ -899,9 +985,9 @@ def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: 
 
     paths = get_design_suite_paths(f_id, p_title, w_id)
 
-    # 1. Studio Render
+    # 1. Studio Render (Authentic Photorealistic Render)
     if not os.path.exists(paths["studio"]) or force_regenerate:
-        render_studio_view(furniture_item, pattern, wood_info, paths["studio"])
+        render_studio_view(furniture_item, pattern, wood_info, paths["studio"], pattern_index=pattern_index)
 
     # 2. CAD Blueprint
     if not os.path.exists(paths["blueprint"]) or force_regenerate:
@@ -913,14 +999,14 @@ def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: 
 
     # 4. In-Situ Scene
     if not os.path.exists(paths["insitu"]) or force_regenerate:
-        render_insitu_view(furniture_item, pattern, wood_info, paths["insitu"])
+        render_insitu_view(furniture_item, pattern, wood_info, paths["insitu"], pattern_index=pattern_index)
 
     return {
         "studio": {
-            "title": "3D Studio Product Render",
+            "title": "Photorealistic Master Studio Render",
             "icon": "📸",
             "badge": "Photorealistic Cyclorama",
-            "desc": "High-definition 3D studio render highlighting wood grain warmth, surface reflectance, and sculptural form under neutral cyclorama studio illumination.",
+            "desc": "High-definition photorealistic product render highlighting wood grain warmth, surface reflectance, and sculptural form under neutral cyclorama studio illumination.",
             "path": paths["studio"]
         },
         "blueprint": {

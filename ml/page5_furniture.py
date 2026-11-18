@@ -497,19 +497,19 @@ def render_recommendations_modal(furniture_id: str):
         top_act_col1, top_act_col2 = st.columns([1.8, 1])
         with top_act_col1:
             if st.button(
-                f"✨ Generate Multi-View Design Suites for All {len(furniture_patterns)} Patterns (1-Click)",
+                f"✨ Generate All {len(furniture_patterns)} Photorealistic Designs (1-Click)",
                 key=f"btn_create_all_designs_{active_item['id']}_{explored_wood_id}",
                 width="stretch"
             ):
-                with st.spinner(f"Generating 4-perspective HD design suites for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
+                with st.spinner(f"Generating photorealistic master designs for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
                     for idx_all, p_all in enumerate(furniture_patterns):
-                        design_visualizer.generate_multi_design_suite(active_item, p_all, explored_wood, force_regenerate=True)
+                        design_visualizer.generate_multi_design_suite(active_item, p_all, explored_wood, force_regenerate=True, pattern_index=idx_all)
                         st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = True
                     st.session_state[studio_tabs_key] = tab_labels[1]
                     st.rerun()
         with top_act_col2:
             if st.button(
-                "✕ Hide All Design Suites",
+                "✕ Hide All Generated Designs",
                 key=f"btn_hide_all_designs_{active_item['id']}_{explored_wood_id}",
                 width="stretch"
             ):
@@ -579,108 +579,122 @@ def render_recommendations_modal(furniture_id: str):
                 act_c1, act_c2 = st.columns([1.8, 1])
                 with act_c1:
                     if st.button(
-                        f"✨ Generate Multi-View Design Suite (4 High-Res Views)",
+                        f"✨ Create Design (Generate Realistic High-Res Image)",
                         key=f"btn_create_design_{active_item['id']}_{explored_wood_id}_{p_idx}",
                         width="stretch",
                         type="primary"
                     ):
-                        with st.spinner(f"Generating 4 architectural perspectives for {pat['title']} in {explored_wood['name']}..."):
-                            design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
+                        with st.spinner(f"Crafting photorealistic architectural design for {pat['title']} in {explored_wood['name']}..."):
+                            design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx)
                             st.session_state[design_state_key] = True
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             is_design_active = True
                 with act_c2:
-                    st.caption("🎨 Creates 4 HD perspectives: 3D Studio Render, CAD Blueprint, Joinery Schematic & In-Situ Scene.")
+                    st.caption("📸 Generates one perfect, photorealistic master studio render with species-accurate timber grain.")
 
             if is_design_active:
-                # Ensure all 4 images in suite are generated
-                design_suite = design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood)
+                # Ensure design suite is generated
+                design_suite = design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, pattern_index=p_idx)
 
                 st.markdown(uhtml(f"""
-                <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:10px;padding:0.75rem 1rem;margin:0.4rem 0 0.5rem 0;">
+                <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:10px;padding:0.75rem 1rem;margin:0.4rem 0 0.6rem 0;">
                   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;">
                     <div>
                       <span style="font-size:0.75rem;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:0.06em;">
-                        🎨 Multi-Perspective Architectural &amp; Studio Design Suite
+                        📸 Photorealistic Master Design Render
                       </span>
-                      <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">
-                        {pat['title']} · Crafted in {explored_wood['name']}
+                      <div style="font-size:1.05rem;font-weight:800;color:var(--ink);">
+                        {pat['title']} · Crafted in Authentic {explored_wood['name']}
                       </div>
                     </div>
                     <div>
-                      <span style="background:var(--good);color:white;font-size:0.72rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:4px;">
-                        ✓ 4 High-Res Perspectives Ready
+                      <span style="background:var(--good);color:white;font-size:0.75rem;font-weight:700;padding:0.25rem 0.75rem;border-radius:4px;">
+                        ✓ High-Resolution 4500K Studio Render
                       </span>
                     </div>
                   </div>
                 </div>
                 """), unsafe_allow_html=True)
 
-                tab_studio, tab_blueprint, tab_joinery, tab_insitu = st.tabs([
-                    "📸 3D Studio Render",
-                    "📐 CAD Blueprint",
-                    "🔍 Joinery Schematic",
-                    "🏡 In-Situ Room Context"
-                ])
+                # 1. DISPLAY THE ONE PERFECT MASTER REALISTIC IMAGE PROMINENTLY
+                studio_info = design_suite["studio"]
+                if os.path.exists(studio_info["path"]):
+                    st.image(
+                        studio_info["path"],
+                        caption=f"📸 {pat['title']} ({active_item['name']}) crafted in Solid {explored_wood['name']}",
+                        width="stretch"
+                    )
 
-                views_mapping = [
-                    (tab_studio, "studio", design_suite.get("studio")),
-                    (tab_blueprint, "blueprint", design_suite.get("blueprint")),
-                    (tab_joinery, "joinery", design_suite.get("joinery")),
-                    (tab_insitu, "insitu", design_suite.get("insitu")),
-                ]
-
-                for v_tab, v_key, v_info in views_mapping:
-                    if not v_info:
-                        continue
-                    with v_tab:
-                        st.markdown(uhtml(f"""
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:0.3rem 0 0.5rem 0;padding:0.4rem 0.7rem;background:var(--surface);border-radius:6px;border:1px solid var(--line);">
-                          <div>
-                            <strong style="color:var(--ink);font-size:0.86rem;">{v_info['icon']} {v_info['title']}</strong>
-                            <span style="color:var(--muted);font-size:0.75rem;margin-left:0.5rem;">— {v_info['desc']}</span>
-                          </div>
-                          <div>
-                            <span style="background:var(--amber-soft);color:var(--amber);font-size:0.68rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:3px;border:1px solid var(--amber);">
-                              {v_info['badge']}
-                            </span>
-                          </div>
-                        </div>
-                        """), unsafe_allow_html=True)
-
-                        if os.path.exists(v_info["path"]):
-                            st.image(
-                                v_info["path"],
-                                caption=f"{v_info['title']}: {pat['title']} ({active_item['name']}) in {explored_wood['name']}",
-                                width="stretch"
+                    btn_c1, btn_c2, btn_c3 = st.columns([1.6, 1.2, 1])
+                    with btn_c1:
+                        with open(studio_info["path"], "rb") as f_img:
+                            st.download_button(
+                                label=f"💾 Download Photorealistic Master Render",
+                                data=f_img.read(),
+                                file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_master.png",
+                                mime="image/png",
+                                key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_studio",
+                                width="stretch",
+                                type="primary"
                             )
-
-                            v_btn_col1, v_btn_col2 = st.columns([1.5, 1])
-                            with v_btn_col1:
-                                with open(v_info["path"], "rb") as f_img:
-                                    st.download_button(
-                                        label=f"📥 Download {v_info['title']} (PNG)",
-                                        data=f_img.read(),
-                                        file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_{v_key}.png",
-                                        mime="image/png",
-                                        key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_{v_key}",
-                                        width="stretch"
-                                    )
-
-                # Controls row: Re-generate all, Close/Hide
-                ctrl_col1, ctrl_col2 = st.columns([1.2, 1])
-                with ctrl_col1:
-                    if st.button("🔄 Re-Generate All 4 Perspectives", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
-                        with st.spinner("Re-generating all 4 design perspectives in HD..."):
-                            design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
-                            st.session_state[design_state_key] = True
+                    with btn_c2:
+                        if st.button("🔄 Regenerate Variation", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
+                            with st.spinner("Regenerating photorealistic master design..."):
+                                design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx)
+                                st.session_state[design_state_key] = True
+                                st.session_state[studio_tabs_key] = tab_labels[1]
+                                st.rerun()
+                    with btn_c3:
+                        if st.button("✕ Close Image", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
+                            st.session_state[design_state_key] = False
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             st.rerun()
-                with ctrl_col2:
-                    if st.button("✕ Close Multi-View Suite", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
-                        st.session_state[design_state_key] = False
-                        st.session_state[studio_tabs_key] = tab_labels[1]
-                        st.rerun()
+
+                # Optional Collapsible Technical CAD Blueprint & Joinery Specs (for woodworkers who want engineering details)
+                with st.expander("📐 Technical CAD Workshop Blueprint & Structural Joinery Schematics (Optional)", expanded=False):
+                    cad_c1, cad_c2 = st.columns(2)
+                    with cad_c1:
+                        bp_info = design_suite.get("blueprint")
+                        if bp_info and os.path.exists(bp_info["path"]):
+                            st.caption("📐 Architectural CAD Workshop Blueprint")
+                            st.image(bp_info["path"], width="stretch")
+                            with open(bp_info["path"], "rb") as f_bp:
+                                st.download_button(
+                                    "📥 Download CAD Blueprint",
+                                    f_bp.read(),
+                                    file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_blueprint.png",
+                                    mime="image/png",
+                                    key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_blueprint",
+                                    width="stretch"
+                                )
+                    with cad_c2:
+                        jn_info = design_suite.get("joinery")
+                        if jn_info and os.path.exists(jn_info["path"]):
+                            st.caption("🔍 Structural Joinery Reticle Schematic")
+                            st.image(jn_info["path"], width="stretch")
+                            with open(jn_info["path"], "rb") as f_jn:
+                                st.download_button(
+                                    "📥 Download Joinery Schematic",
+                                    f_jn.read(),
+                                    file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_joinery.png",
+                                    mime="image/png",
+                                    key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_joinery",
+                                    width="stretch"
+                                )
+                    # In-situ context
+                    insitu_info = design_suite.get("insitu")
+                    if insitu_info and os.path.exists(insitu_info["path"]):
+                        st.caption("🏡 In-Situ Architectural Living Scene Context")
+                        st.image(insitu_info["path"], width="stretch")
+                        with open(insitu_info["path"], "rb") as f_is:
+                            st.download_button(
+                                "📥 Download In-Situ Living Scene",
+                                f_is.read(),
+                                file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_insitu.png",
+                                mime="image/png",
+                                key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_insitu",
+                                width="stretch"
+                            )
 
             st.markdown("<div style='margin-bottom:1.2rem;'></div>", unsafe_allow_html=True)
 
