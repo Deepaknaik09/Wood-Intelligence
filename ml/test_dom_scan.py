@@ -82,6 +82,10 @@ def run_scan():
         check("Tab Navigation (Explore Blueprints Click)", active_tab == "Design Patterns & Blueprints (Cot)", f"Successfully navigated to Tab 2: '{active_tab}'")
 
     # 11. Modal Tab 2: Design Patterns & Multi-View Suite
+    # Trigger 1-Click Multi-Design Suite Generation
+    create_all_btn = [b for b in at.button if b.key and b.key.startswith("btn_create_all_designs_cot_")]
+    if create_all_btn:
+        create_all_btn[0].click().run()
     design_download_btns = [db.key for db in at.download_button if db.key and db.key.startswith("dl_btn_cot_")]
     check("Multi-View Design Suite DOM Render", len(design_download_btns) >= 4, f"Mounted {len(design_download_btns)} high-res download buttons across design views")
 

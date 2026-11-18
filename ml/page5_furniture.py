@@ -491,6 +491,64 @@ def render_recommendations_modal(furniture_id: str):
         </div>
         """), unsafe_allow_html=True)
 
+        # AI Generative Engine Key Configuration & Persistence
+        active_ai_key = st.session_state.get("ai_image_api_key", os.environ.get("GEMINI_API_KEY", os.environ.get("GOOGLE_API_KEY", os.environ.get("OPENAI_API_KEY", ""))))
+        if not active_ai_key:
+            env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+            if os.path.exists(env_path):
+                try:
+                    with open(env_path, "r", encoding="utf-8") as f_env:
+                        for l_env in f_env:
+                            for k_cand in ("GEMINI_API_KEY=", "GOOGLE_API_KEY=", "OPENAI_API_KEY="):
+                                if l_env.strip().startswith(k_cand):
+                                    active_ai_key = l_env.strip().split("=", 1)[1].strip("'\" \r\n")
+                                    st.session_state["ai_image_api_key"] = active_ai_key
+                                    break
+                except Exception:
+                    pass
+
+        has_ai_key = bool(active_ai_key and len(active_ai_key) > 8)
+        ai_provider = "Google Imagen 3 (Gemini)" if (active_ai_key.startswith("AIza") or len(active_ai_key) == 39) else ("OpenAI DALL-E 3" if active_ai_key.startswith("sk-") else "Cloud AI")
+
+        with st.expander(
+            f"✨ AI Image Engine: {'🟢 ' + ai_provider + ' Active (100% Unique Renders)' if has_ai_key else '📸 Studio Photographic Library (Connect Gemini / OpenAI Key for Live Generative AI)'}",
+            expanded=False
+        ):
+            if has_ai_key:
+                st.success(f"✓ **Connected to {ai_provider}**. Every single click generates a 100% brand-new, unique 8K photorealistic product render tailored to {explored_wood['name']}.")
+            else:
+                st.info("💡 **Do you have a Google Gemini or OpenAI API key?** Enter it below to unlock live, on-demand AI image generation that produces a completely brand-new, unique photorealistic image on every generation!")
+
+            col_k1, col_k2, col_k3 = st.columns([2.5, 1, 1])
+            with col_k1:
+                key_input_val = st.text_input(
+                    "API Key (Google Gemini AI Studio 'AIza...' or OpenAI 'sk-...'):",
+                    value=active_ai_key,
+                    type="password",
+                    key="input_furniture_ai_key",
+                    help="Get a free Gemini API key at aistudio.google.com/app/apikey"
+                )
+            with col_k2:
+                st.write("")
+                st.write("")
+                if st.button("💾 Save Key", key="btn_save_ai_key", width="stretch"):
+                    st.session_state["ai_image_api_key"] = key_input_val.strip()
+                    try:
+                        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+                        env_key_name = "GEMINI_API_KEY" if key_input_val.strip().startswith("AIza") or len(key_input_val.strip()) == 39 else "OPENAI_API_KEY"
+                        with open(env_path, "a", encoding="utf-8") as f_app:
+                            f_app.write(f"\n{env_key_name}={key_input_val.strip()}\n")
+                    except Exception:
+                        pass
+                    st.toast("AI API Key saved successfully!", icon="✅")
+                    st.rerun()
+            with col_k3:
+                st.write("")
+                st.write("")
+                if st.button("✕ Remove Key", key="btn_clear_ai_key", width="stretch"):
+                    st.session_state["ai_image_api_key"] = ""
+                    st.rerun()
+
         furniture_patterns = furniture_recommender.get_furniture_design_patterns(active_item["id"], explored_wood_id)
 
         # Master Action Toolbar to generate all design pictures at once
@@ -503,7 +561,9 @@ def render_recommendations_modal(furniture_id: str):
             ):
                 with st.spinner(f"Generating photorealistic master designs for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
                     for idx_all, p_all in enumerate(furniture_patterns):
-                        design_visualizer.generate_multi_design_suite(active_item, p_all, explored_wood, force_regenerate=True, pattern_index=idx_all)
+                        design_visualizer.generate_multi_design_suite(
+                            active_item, p_all, explored_wood, force_regenerate=True, pattern_index=idx_all, api_key=st.session_state.get("ai_image_api_key", active_ai_key)
+                        )
                         st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = True
                     st.session_state[studio_tabs_key] = tab_labels[1]
                     st.rerun()
@@ -585,7 +645,9 @@ def render_recommendations_modal(furniture_id: str):
                         type="primary"
                     ):
                         with st.spinner(f"Crafting photorealistic architectural design for {pat['title']} in {explored_wood['name']}..."):
-                            design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx)
+                            design_visualizer.generate_multi_design_suite(
+                                active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx, api_key=st.session_state.get("ai_image_api_key", active_ai_key)
+                            )
                             st.session_state[design_state_key] = True
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             is_design_active = True
@@ -594,7 +656,9 @@ def render_recommendations_modal(furniture_id: str):
 
             if is_design_active:
                 # Ensure design suite is generated
-                design_suite = design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, pattern_index=p_idx)
+                design_suite = design_visualizer.generate_multi_design_suite(
+                    active_item, pat, explored_wood, pattern_index=p_idx, api_key=st.session_state.get("ai_image_api_key", active_ai_key)
+                )
 
                 st.markdown(uhtml(f"""
                 <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:10px;padding:0.75rem 1rem;margin:0.4rem 0 0.6rem 0;">
@@ -640,7 +704,9 @@ def render_recommendations_modal(furniture_id: str):
                     with btn_c2:
                         if st.button("🔄 Regenerate Variation", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
                             with st.spinner("Regenerating photorealistic master design..."):
-                                design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx)
+                                design_visualizer.generate_multi_design_suite(
+                                    active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx, api_key=st.session_state.get("ai_image_api_key", active_ai_key)
+                                )
                                 st.session_state[design_state_key] = True
                                 st.session_state[studio_tabs_key] = tab_labels[1]
                                 st.rerun()

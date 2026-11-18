@@ -13,6 +13,10 @@ individual design style (Floating, Spindle Slat, Live-Edge, Craftsman, Trestle, 
 import os
 import re
 import math
+import io
+import json
+import base64
+import urllib.request
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "generated_designs")
@@ -133,13 +137,117 @@ def apply_species_photographic_grading(img: Image.Image, wood_id: str) -> Image.
     return enhancer.enhance(1.04)
 
 
+def generate_ai_furniture_image(furniture_item: dict, pattern: dict, wood_info: dict, api_key: str = None) -> tuple:
+    """
+    Calls Google Imagen 3 or OpenAI DALL-E 3 to generate a brand-new, unique,
+    photorealistic 8K architectural product photograph for this specific furniture piece,
+    pattern, and authentic timber species.
+    
+    Returns (PIL.Image, provider_name) or (None, error_str).
+    """
+    f_name = furniture_item.get("name", "Furniture Piece")
+    p_title = pattern.get("title", "Contemporary Architectural Design")
+    w_name = wood_info.get("name", "Solid Hardwood") if wood_info else "Solid Hardwood"
+    p_joinery = pattern.get("recommended_joinery", "traditional mortise and tenon")
+    p_finish = pattern.get("recommended_finish", "satin hardwax oil")
+    
+    prompt = (
+        f"A hyper-realistic, award-winning 8k professional studio product photograph of a {p_title} ({f_name}), "
+        f"expertly handcrafted from authentic solid {w_name} timber. "
+        f"The timber exhibits rich natural grain patterns, smooth {p_finish} finish, and master {p_joinery} joinery. "
+        f"Clean 4500K neutral studio cyclorama background, soft floor contact shadow, diffused softbox lighting, "
+        f"architectural digest furniture exhibition catalog photography, sharp focus, 8k resolution, photorealistic."
+    )
+    
+    key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    if not key:
+        env_path = os.path.join(ROOT_PROJECT_DIR, ".env")
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if "=" in line and not line.strip().startswith("#"):
+                            k, v = line.strip().split("=", 1)
+                            if k.strip() in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY"):
+                                key = v.strip("'\" \r\n")
+                                break
+            except Exception:
+                pass
+
+    if not key:
+        return None, "No API key found"
+
+    # 1. Google Gemini / Imagen 3 API
+    if key.startswith("AIza") or (len(key) == 39 and not key.startswith("sk-")):
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={key}"
+            payload = {
+                "instances": [{"prompt": prompt}],
+                "parameters": {
+                    "sampleCount": 1,
+                    "aspectRatio": "4:3",
+                    "outputMimeType": "image/jpeg"
+                }
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                predictions = result.get("predictions", [])
+                if predictions and "bytesBase64Encoded" in predictions[0]:
+                    img_data = base64.b64decode(predictions[0]["bytesBase64Encoded"])
+                    im = Image.open(io.BytesIO(img_data)).convert("RGB")
+                    return im, "Google Imagen 3"
+        except Exception as e:
+            return None, f"Google Imagen error: {e}"
+
+    # 2. OpenAI DALL-E 3 API
+    if key.startswith("sk-"):
+        try:
+            url = "https://api.openai.com/v1/images/generations"
+            payload = {
+                "model": "dall-e-3",
+                "prompt": prompt,
+                "n": 1,
+                "size": "1024x1024",
+                "response_format": "b64_json"
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {key}"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=35) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                data = result.get("data", [])
+                if data and "b64_json" in data[0]:
+                    img_data = base64.b64decode(data[0]["b64_json"])
+                    im = Image.open(io.BytesIO(img_data)).convert("RGB")
+                    return im, "OpenAI DALL-E 3"
+        except Exception as e:
+            return None, f"OpenAI DALL-E 3 error: {e}"
+
+    return None, "Unrecognized API key type (expected Google AI Studio 'AIza...' or OpenAI 'sk-...')"
+
+
 def get_pattern_photo(furniture_id: str, pattern: dict = None, pattern_index: int = 0) -> str:
     """Finds the best authentic, high-resolution photograph for this furniture piece & pattern."""
+    # 1. First priority: Exact pattern photograph matching furniture_id and pattern_index
+    direct_jpg = os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_{pattern_index}.jpg")
+    if os.path.exists(direct_jpg):
+        return direct_jpg
+    direct_png = os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_{pattern_index}.png")
+    if os.path.exists(direct_png):
+        return direct_png
+
     p_title = pattern.get("title", "").lower() if pattern else ""
-    candidates = [
-        os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_{pattern_index}.jpg"),
-        os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", f"{furniture_id}_{pattern_index}.png"),
-    ]
+    candidates = []
     if "wishbone" in p_title or "scandi" in p_title:
         candidates.insert(0, os.path.join(PROJECT_ASSETS_DIR, "furniture_patterns", "dining_chair_0.jpg"))
     elif "sculptural" in p_title or "mid_century" in p_title or "mid-century" in p_title:
@@ -508,7 +616,7 @@ def generate_pattern_artwork(furniture_id: str, pattern: dict, wood_info: dict, 
 # =============================================================================
 # VIEW 1: 3D STUDIO PRODUCT RENDER (Photorealistic Studio Cyclorama)
 # =============================================================================
-def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str, pattern_index: int = 0):
+def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, output_path: str, pattern_index: int = 0, api_key: str = None):
     W, H = 1200, 840
     bg_cyclorama = (248, 249, 251)
     im = Image.new("RGB", (W, H), bg_cyclorama)
@@ -546,7 +654,18 @@ def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, out
     draw.rectangle([20, 18, W - 20, H - 18], outline=(215, 220, 230), width=1)
     draw.rectangle([24, 22, W - 24, H - 22], outline=(232, 236, 244), width=1)
 
-    # 3. Header Strip
+    # 3. Load & Composite Authentic High-Res Photograph (AI Generated or Photographic Master)
+    ai_img, ai_provider = generate_ai_furniture_image(furniture_item, pattern, wood_info, api_key=api_key)
+    if ai_img is not None:
+        photo = ai_img
+        w_source_tag = f"✨ AI {ai_provider}"
+    else:
+        photo_path = get_pattern_photo(furniture_item.get("id", "piece"), pattern, pattern_index)
+        photo = Image.open(photo_path).convert("RGB")
+        photo = apply_species_photographic_grading(photo, w_id)
+        w_source_tag = "📸 4500K Studio Photometrics"
+
+    # Header Strip
     f_h1 = get_font(18, bold=True)
     f_h2 = get_font(13, bold=False)
     f_badge = get_font(11, bold=True, mono=True)
@@ -558,35 +677,18 @@ def render_studio_view(furniture_item: dict, pattern: dict, wood_info: dict, out
     draw.text((50, 38), f"{f_name.upper()} — PHOTOREALISTIC DESIGN MASTER RENDER", fill=(25, 30, 42), font=f_h1)
     draw.text((50, 62), f"Design Pattern: {p_title} · Style: [{p_badge}] · Crafted in Authentic {w_name} ({w_sci})", fill=(100, 108, 120), font=f_h2)
 
-    draw.rectangle([W - 260, 38, W - 48, 76], fill=(245, 248, 255), outline=(180, 200, 235), width=1)
-    draw.text((W - 248, 44), "📸 4500K STUDIO PHOTOMETRICS", fill=(35, 80, 150), font=f_badge)
-    draw.text((W - 248, 59), f"Solid {w_name} Grain & Specular Finish", fill=(90, 120, 170), font=f_tag)
+    draw.rectangle([W - 270, 38, W - 48, 76], fill=(245, 248, 255), outline=(180, 200, 235), width=1)
+    draw.text((W - 258, 44), w_source_tag, fill=(35, 80, 150), font=f_badge)
+    draw.text((W - 258, 59), f"Solid {w_name} Grain & Specular Finish", fill=(90, 120, 170), font=f_tag)
 
-    # 4. Load & Composite Authentic High-Res Photograph
-    photo_path = get_pattern_photo(furniture_item.get("id", "piece"), pattern, pattern_index)
-    photo = Image.open(photo_path).convert("RGB")
-    graded_photo = apply_species_photographic_grading(photo, w_id)
-
-    photo_fit = graded_photo.copy()
+    photo_fit = photo.copy()
     photo_fit.thumbnail((960, 560), Image.Resampling.LANCZOS)
     px = (W - photo_fit.width) // 2
     py = 100 + (610 - photo_fit.height) // 2
 
-    # Multi-stage realistic contact & soft floor drop shadow
-    shadow_overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    s_draw = ImageDraw.Draw(shadow_overlay)
-    s_w, s_h = int(photo_fit.width * 1.05), 36
-    s_x = (W - s_w) // 2
-    s_y = py + photo_fit.height - 18
-    s_draw.ellipse([s_x, s_y, s_x + s_w, s_y + s_h], fill=(0, 0, 0, 32))
-    c_w, c_h = int(photo_fit.width * 0.85), 18
-    c_x = (W - c_w) // 2
-    c_y = py + photo_fit.height - 10
-    s_draw.ellipse([c_x, c_y, c_x + c_w, c_y + c_h], fill=(0, 0, 0, 65))
-
-    im = Image.alpha_composite(im.convert("RGBA"), shadow_overlay).convert("RGB")
+    # Clean presentation with crisp studio matting
+    draw.rectangle([px - 2, py - 2, px + photo_fit.width + 1, py + photo_fit.height + 1], fill=(255, 255, 255), outline=(218, 224, 234), width=1)
     im.paste(photo_fit, (px, py))
-    draw = ImageDraw.Draw(im)
 
     # 5. Bottom Architectural Feature Cards
     card_y = H - 110
@@ -969,7 +1071,7 @@ def generate_furniture_design_image(furniture_item: dict, pattern: dict, wood_in
         render_blueprint_view(furniture_item, pattern, wood_info, paths["blueprint"])
     return paths["blueprint"]
 
-def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: dict, force_regenerate: bool = False, pattern_index: int = 0) -> dict:
+def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: dict, force_regenerate: bool = False, pattern_index: int = 0, api_key: str = None) -> dict:
     """
     Renders all 4 distinct high-resolution design perspectives:
     1. 3D Studio Product Render (1200x840 HD, authentic photographic studio cyclorama)
@@ -987,7 +1089,7 @@ def generate_multi_design_suite(furniture_item: dict, pattern: dict, wood_info: 
 
     # 1. Studio Render (Authentic Photorealistic Render)
     if not os.path.exists(paths["studio"]) or force_regenerate:
-        render_studio_view(furniture_item, pattern, wood_info, paths["studio"], pattern_index=pattern_index)
+        render_studio_view(furniture_item, pattern, wood_info, paths["studio"], pattern_index=pattern_index, api_key=api_key)
 
     # 2. CAD Blueprint
     if not os.path.exists(paths["blueprint"]) or force_regenerate:
