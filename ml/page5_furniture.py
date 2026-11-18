@@ -234,11 +234,11 @@ def render_recommendations_modal(furniture_id: str):
     hero_col_img, hero_col_info = st.columns([1, 2], gap="large")
     with hero_col_img:
         st.markdown(uhtml(f'''
-        <div style="background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);
-                    border-radius:8px;padding:8px;text-align:center;margin-bottom:8px;
-                    box-shadow:0 2px 8px rgba(43,24,13,0.06);">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;
-                      text-transform:uppercase;">Selected Woodwork Piece</div>
+        <div style="background:var(--surface);border:1px solid var(--line);
+                    border-radius:10px;padding:8px;text-align:center;margin-bottom:8px;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;
+                      text-transform:uppercase;">Architectural Piece · Master Catalog</div>
         </div>'''), unsafe_allow_html=True)
         if os.path.exists(active_item["image"]):
             st.image(active_item["image"], width="stretch")
@@ -252,37 +252,37 @@ def render_recommendations_modal(furniture_id: str):
         ai_ov = active_item['overview']
         sp = active_item['stress_profile']
         st.markdown(uhtml(f'''
-        <div class="wi-furniture-dossier" style="background:linear-gradient(135deg,#2b180d,#3d1f0a) !important;border-radius:10px;
-                    padding:1.3rem 1.5rem;color:#f3e3c8 !important;height:100%;min-height:240px;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
-          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem;flex-wrap:wrap;">
-            <span class="dossier-title" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.55rem;font-weight:800;color:#ffd166 !important;text-shadow:0 2px 10px rgba(0,0,0,0.85);">{ai_name}</span>
-            <span class="dossier-chip" style="background:rgba(217,143,43,0.25) !important;border:1px solid rgba(217,143,43,0.6) !important;
-                         color:#ffd166 !important;padding:0.2rem 0.65rem;border-radius:4px;font-size:0.75rem;font-weight:700;letter-spacing:0.04em;">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;
+                    padding:1.35rem 1.6rem;height:100%;min-height:240px;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;flex-wrap:wrap;">
+            <span style="font-size:1.6rem;font-weight:700;color:var(--ink);letter-spacing:-0.02em;">{ai_name}</span>
+            <span style="background:var(--surface-2);border:1px solid var(--line);
+                         color:var(--ink);padding:0.2rem 0.65rem;border-radius:4px;font-size:0.72rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">
               {ai_cat}
             </span>
           </div>
-          <div class="dossier-tagline" style="font-size:0.92rem;font-weight:700;color:#fcd34d !important;margin-bottom:0.5rem;line-height:1.45;">{ai_tag}</div>
-          <p class="dossier-desc" style="font-size:0.85rem;color:#f7eee1 !important;line-height:1.55;margin:0 0 0.9rem 0;opacity:0.95;">{ai_ov}</p>
+          <div style="font-size:0.88rem;font-weight:600;color:var(--muted);margin-bottom:0.5rem;line-height:1.45;">{ai_tag}</div>
+          <p style="font-size:0.84rem;color:var(--ink);line-height:1.55;margin:0 0 0.9rem 0;">{ai_ov}</p>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.45rem;">
-            <div style="background:rgba(255,255,255,0.08);border-radius:9px;padding:0.5rem 0.6rem;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:0.64rem;color:#fbbf24 !important;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Min MOR</div>
-              <div style="font-size:0.9rem;font-weight:800;color:#6ee7b7 !important;">{sp['min_mor']}</div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:0.6rem 0.75rem;border:1px solid var(--line);">
+              <div style="font-size:0.64rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Min Flexural MOR</div>
+              <div style="font-size:0.92rem;font-weight:700;color:var(--ink);margin-top:2px;">{sp['min_mor']}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.08);border-radius:9px;padding:0.5rem 0.6rem;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:0.64rem;color:#fbbf24 !important;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Density</div>
-              <div style="font-size:0.9rem;font-weight:800;color:#6ee7b7 !important;">{sp['density_range']}</div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:0.6rem 0.75rem;border:1px solid var(--line);">
+              <div style="font-size:0.64rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Target Bulk Density</div>
+              <div style="font-size:0.92rem;font-weight:700;color:var(--ink);margin-top:2px;">{sp['density_range']}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.08);border-radius:9px;padding:0.5rem 0.6rem;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:0.64rem;color:#fbbf24 !important;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Moisture</div>
-              <div style="font-size:0.9rem;font-weight:800;color:#6ee7b7 !important;">{sp['target_mc']}</div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:0.6rem 0.75rem;border:1px solid var(--line);">
+              <div style="font-size:0.64rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Equilibrium Moisture</div>
+              <div style="font-size:0.92rem;font-weight:700;color:var(--ink);margin-top:2px;">{sp['target_mc']}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.08);border-radius:9px;padding:0.5rem 0.6rem;grid-column:span 2;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:0.64rem;color:#fbbf24 !important;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Load Type</div>
-              <div style="font-size:0.8rem;font-weight:700;color:#fde68a !important;line-height:1.3;">{sp['load_type']}</div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:0.6rem 0.75rem;grid-column:span 2;border:1px solid var(--line);">
+              <div style="font-size:0.64rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Structural Duty</div>
+              <div style="font-size:0.82rem;font-weight:600;color:var(--ink);line-height:1.3;margin-top:2px;">{sp['load_type']}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.08);border-radius:9px;padding:0.5rem 0.6rem;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:0.64rem;color:#fbbf24 !important;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Grain Cut</div>
-              <div style="font-size:0.76rem;font-weight:700;color:#fde68a !important;line-height:1.3;">{sp['recommended_cut']}</div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:0.6rem 0.75rem;border:1px solid var(--line);">
+              <div style="font-size:0.64rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Recommended Cut</div>
+              <div style="font-size:0.82rem;font-weight:600;color:var(--ink);line-height:1.3;margin-top:2px;">{sp['recommended_cut']}</div>
             </div>
           </div>
         </div>'''), unsafe_allow_html=True)
@@ -321,10 +321,13 @@ def render_recommendations_modal(furniture_id: str):
     # -----------------------------------------------------------------------
     with tab_woods:
         st.markdown(uhtml(f"""
-        <div style="margin-bottom:0.85rem;">
-          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;">Ranked Timber Suitability for {active_item['name']}</h4>
-          <p style="font-size:0.83rem;color:var(--muted);margin:0;">
-            Normalized across 28 commercial timbers using bending strength (MOR), Janka hardness, dimensional stability, workability, and cost tier.
+        <div style="margin-bottom:0.95rem;padding-bottom:0.65rem;border-bottom:1px solid var(--line);">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">
+            MATERIAL EVALUATION &amp; STRUCTURAL SUITABILITY
+          </div>
+          <h4 style="color:var(--ink);margin:0 0 0.25rem 0;letter-spacing:-0.02em;">Structural Material Suitability · {active_item['name']}</h4>
+          <p style="font-size:0.83rem;color:var(--muted);margin:0;line-height:1.5;">
+            Evaluated across 28 commercial species based on flexural load capacity (MOR), dimensional grain stability, hand-tool workability, and seasonal movement in service.
           </p>
         </div>
         """), unsafe_allow_html=True)
@@ -344,6 +347,11 @@ def render_recommendations_modal(furniture_id: str):
             score_bar_color = "var(--good)" if score >= 90 else ("var(--warn)" if score >= 80 else "var(--amber)")
             cost_stars = f"Tier {wood['costTier']}/5"
 
+            # Practical craftsmanship badges
+            dur_score = wood.get("durability", 5)
+            env_tag = "High-Humidity Resilient" if (dur_score >= 8 or wood["id"] in ["teak", "sheesham", "sal", "rosewood"]) else ("Heavy Commercial Wear" if wood.get("hardness", 4000) >= 6000 else "Indoor Climate-Controlled")
+            work_tag = "Clean Hand-Tool Planing" if wood.get("workability", 5) >= 8 else "Carbide Cutters Recommended"
+
             st.markdown(uhtml(f"""
             <div style="background:var(--surface);border:1px solid {card_border};border-radius:10px;padding:1.25rem 1.4rem;margin-bottom:0.85rem;box-shadow:0 2px 10px rgba(0,0,0,0.03);">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.75rem;">
@@ -354,9 +362,15 @@ def render_recommendations_modal(furniture_id: str):
                     <span style="background:{badge_bg};color:{badge_color};font-size:0.68rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:4px;letter-spacing:0.04em;">
                       {badge_label}
                     </span>
+                    <span style="background:var(--surface-2);color:var(--muted);border:1px solid var(--line);font-size:0.68rem;font-weight:600;padding:0.18rem 0.5rem;border-radius:4px;">
+                      {env_tag}
+                    </span>
+                    <span style="background:var(--surface-2);color:var(--muted);border:1px solid var(--line);font-size:0.68rem;font-weight:600;padding:0.18rem 0.5rem;border-radius:4px;">
+                      {work_tag}
+                    </span>
                   </div>
-                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem;">
-                    Weight: <strong>{wood['weightClass']}</strong> &nbsp;·&nbsp; Cost: <strong>{cost_stars}</strong> &nbsp;·&nbsp; Availability: <strong>{wood['availabilityInIndia']}/10</strong>
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.35rem;">
+                    Weight: <strong>{wood['weightClass']}</strong> &nbsp;·&nbsp; Cost: <strong>{cost_stars}</strong> &nbsp;·&nbsp; Regional Supply: <strong>{wood['availabilityInIndia']}/10</strong>
                   </div>
                 </div>
                 <div style="text-align:right;min-width:110px;">
@@ -402,9 +416,9 @@ def render_recommendations_modal(furniture_id: str):
 
               <!-- Editorial Rationale & Trade-offs -->
               <div style="margin-top:0.75rem;padding-top:0.65rem;border-top:1px solid var(--line);font-size:0.83rem;color:var(--ink);line-height:1.55;">
-                <div style="font-weight:600;color:var(--ink);margin-bottom:0.25rem;">Architectural Rationale:</div>
+                <div style="font-weight:600;color:var(--ink);margin-bottom:0.25rem;">Material Engineering Rationale:</div>
                 <div style="color:var(--muted);margin-bottom:0.45rem;">{" · ".join(reasons)}</div>
-                <div style="font-size:0.78rem;color:var(--muted);"><strong>Fabrication Considerations:</strong> {" · ".join(tradeoffs)}</div>
+                <div style="font-size:0.78rem;color:var(--muted);"><strong>Workshop Fabrication Notes:</strong> {" · ".join(tradeoffs)}</div>
               </div>
             </div>
             """), unsafe_allow_html=True)
@@ -444,7 +458,7 @@ def render_recommendations_modal(furniture_id: str):
         exp_w_names = [w["name"] for w in scoring_engine.WOODS_DATABASE]
         exp_w_ids = [w["id"] for w in scoring_engine.WOODS_DATABASE]
         sel_w_name = st.selectbox(
-            f"Tailor Architectural Blueprints & Design Patterns for {active_item['name']} Using:",
+            f"Select Active Crafting Timber:",
             exp_w_names,
             index=exp_w_ids.index(explored_wood_id) if explored_wood_id in exp_w_ids else 0,
             key="dlg_pattern_wood_select"
@@ -498,16 +512,16 @@ def render_recommendations_modal(furniture_id: str):
                     pass
 
         has_ai_key = bool(active_ai_key and len(active_ai_key) > 8)
-        ai_provider = "Google Imagen 3 (Gemini)" if (active_ai_key.startswith("AIza") or len(active_ai_key) == 39) else ("OpenAI DALL-E 3" if active_ai_key.startswith("sk-") else "Cloud AI")
+        ai_provider = "Google Imagen 3" if (active_ai_key.startswith("AIza") or len(active_ai_key) == 39) else ("OpenAI DALL-E 3" if active_ai_key.startswith("sk-") else "Cloud Generative AI")
 
         with st.expander(
-            f"✨ AI Image Engine: {'🟢 ' + ai_provider + ' Active (100% Unique Renders)' if has_ai_key else '📸 Studio Photographic Library (Connect Gemini / OpenAI Key for Live Generative AI)'}",
+            f"Visualizer Studio Engine: {'Generative AI Active (' + ai_provider + ')' if has_ai_key else 'Studio Master Photography (Add API Key for Generative AI)'}",
             expanded=False
         ):
             if has_ai_key:
-                st.success(f"✓ **Connected to {ai_provider}**. Every single click generates a 100% brand-new, unique 8K photorealistic product render tailored to {explored_wood['name']}.")
+                st.success(f"✓ **Connected to {ai_provider}**. Every request renders a unique 8K architectural studio visualization calibrated to {explored_wood['name']}.")
             else:
-                st.info("💡 **Do you have a Google Gemini or OpenAI API key?** Enter it below to unlock live, on-demand AI image generation that produces a completely brand-new, unique photorealistic image on every generation!")
+                st.info("💡 **Connect Google Gemini / Imagen 3 or OpenAI API Key** below to generate on-demand AI variations with unique camera perspectives and lighting.")
 
             col_k1, col_k2, col_k3 = st.columns([2.5, 1, 1])
             with col_k1:
@@ -521,7 +535,7 @@ def render_recommendations_modal(furniture_id: str):
             with col_k2:
                 st.write("")
                 st.write("")
-                if st.button("💾 Save Key", key="btn_save_ai_key", width="stretch"):
+                if st.button("Save Key", key="btn_save_ai_key", width="stretch"):
                     st.session_state["ai_image_api_key"] = key_input_val.strip()
                     try:
                         env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
@@ -535,7 +549,7 @@ def render_recommendations_modal(furniture_id: str):
             with col_k3:
                 st.write("")
                 st.write("")
-                if st.button("✕ Remove Key", key="btn_clear_ai_key", width="stretch"):
+                if st.button("Remove Key", key="btn_clear_ai_key", width="stretch"):
                     st.session_state["ai_image_api_key"] = ""
                     st.rerun()
 
@@ -545,7 +559,7 @@ def render_recommendations_modal(furniture_id: str):
         top_act_col1, top_act_col2 = st.columns([1.8, 1])
         with top_act_col1:
             if st.button(
-                f"✨ Generate All {len(furniture_patterns)} Photorealistic Designs (1-Click)",
+                f"Generate Studio Visualizations for All {len(furniture_patterns)} Patterns",
                 key=f"btn_create_all_designs_{active_item['id']}_{explored_wood_id}",
                 width="stretch"
             ):
@@ -559,7 +573,7 @@ def render_recommendations_modal(furniture_id: str):
                     st.rerun()
         with top_act_col2:
             if st.button(
-                "✕ Hide All Generated Designs",
+                "Hide All Visualizations",
                 key=f"btn_hide_all_designs_{active_item['id']}_{explored_wood_id}",
                 width="stretch"
             ):
@@ -622,7 +636,7 @@ def render_recommendations_modal(furniture_id: str):
                 act_c1, act_c2 = st.columns([1.8, 1])
                 with act_c1:
                     if st.button(
-                        f"✨ Create Design (Generate Realistic High-Res Image)",
+                        f"Generate Studio Visualization",
                         key=f"btn_create_design_{active_item['id']}_{explored_wood_id}_{p_idx}",
                         width="stretch",
                         type="primary"
@@ -635,7 +649,7 @@ def render_recommendations_modal(furniture_id: str):
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             is_design_active = True
                 with act_c2:
-                    st.caption("📸 Generates one perfect, photorealistic master studio render with species-accurate timber grain.")
+                    st.caption("Generates balanced 4500K studio visualization calibrated to natural wood grain.")
 
             if is_design_active:
                 # Ensure design suite is generated
@@ -667,7 +681,7 @@ def render_recommendations_modal(furniture_id: str):
                     with btn_c1:
                         with open(studio_info["path"], "rb") as f_img:
                             st.download_button(
-                                label=f"Download High-Res Master Render",
+                                label=f"Download Master Render",
                                 data=f_img.read(),
                                 file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_master.png",
                                 mime="image/png",
@@ -676,7 +690,7 @@ def render_recommendations_modal(furniture_id: str):
                                 type="primary"
                             )
                     with btn_c2:
-                        if st.button("🔄 Regenerate Variation", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
+                        if st.button("Regenerate Visualization", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
                             with st.spinner("Regenerating photorealistic master design..."):
                                 design_visualizer.generate_multi_design_suite(
                                     active_item, pat, explored_wood, force_regenerate=True, pattern_index=p_idx, api_key=st.session_state.get("ai_image_api_key", active_ai_key)
@@ -685,22 +699,22 @@ def render_recommendations_modal(furniture_id: str):
                                 st.session_state[studio_tabs_key] = tab_labels[1]
                                 st.rerun()
                     with btn_c3:
-                        if st.button("✕ Close Image", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
+                        if st.button("Close Visualization", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
                             st.session_state[design_state_key] = False
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             st.rerun()
 
                 # Optional Collapsible Technical CAD Blueprint & Joinery Specs (for woodworkers who want engineering details)
-                with st.expander("📐 Technical CAD Workshop Blueprint & Structural Joinery Schematics (Optional)", expanded=False):
+                with st.expander("Technical CAD Drafting & Joinery Schematics (Workshop Specs)", expanded=False):
                     cad_c1, cad_c2 = st.columns(2)
                     with cad_c1:
                         bp_info = design_suite.get("blueprint")
                         if bp_info and os.path.exists(bp_info["path"]):
-                            st.caption("📐 Architectural CAD Workshop Blueprint")
+                            st.caption("Architectural CAD Workshop Blueprint")
                             st.image(bp_info["path"], width="stretch")
                             with open(bp_info["path"], "rb") as f_bp:
                                 st.download_button(
-                                    "📥 Download CAD Blueprint",
+                                    "Download CAD Blueprint",
                                     f_bp.read(),
                                     file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_blueprint.png",
                                     mime="image/png",
@@ -710,11 +724,11 @@ def render_recommendations_modal(furniture_id: str):
                     with cad_c2:
                         jn_info = design_suite.get("joinery")
                         if jn_info and os.path.exists(jn_info["path"]):
-                            st.caption("🔍 Structural Joinery Reticle Schematic")
+                            st.caption("Structural Joinery Schematic")
                             st.image(jn_info["path"], width="stretch")
                             with open(jn_info["path"], "rb") as f_jn:
                                 st.download_button(
-                                    "📥 Download Joinery Schematic",
+                                    "Download Joinery Schematic",
                                     f_jn.read(),
                                     file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_joinery.png",
                                     mime="image/png",
@@ -724,11 +738,11 @@ def render_recommendations_modal(furniture_id: str):
                     # In-situ context
                     insitu_info = design_suite.get("insitu")
                     if insitu_info and os.path.exists(insitu_info["path"]):
-                        st.caption("🏡 In-Situ Architectural Living Scene Context")
+                        st.caption("In-Situ Living Space Visualization")
                         st.image(insitu_info["path"], width="stretch")
                         with open(insitu_info["path"], "rb") as f_is:
                             st.download_button(
-                                "📥 Download In-Situ Living Scene",
+                                "Download In-Situ Scene",
                                 f_is.read(),
                                 file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_insitu.png",
                                 mime="image/png",
@@ -778,14 +792,14 @@ def render_recommendations_modal(furniture_id: str):
             
             with col_slot:
                 st.markdown(uhtml(f"""
-                <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:1rem;box-shadow:0 4px 14px rgba(0,0,0,0.06);">
-                  <div style="font-size:0.72rem;color:var(--amber);font-weight:700;text-transform:uppercase;">TIMBER PROFILE</div>
-                  <div style="font-size:1.3rem;font-weight:800;color:var(--ink);">{w_obj['name']}</div>
-                  <div style="font-style:italic;color:var(--muted);font-size:0.84rem;margin-bottom:0.7rem;">{w_obj['scientificName']}</div>
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.2rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                  <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Comparative Material Profile</div>
+                  <div style="font-size:1.35rem;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-top:0.15rem;">{w_obj['name']}</div>
+                  <div style="font-style:italic;color:var(--muted);font-size:0.84rem;margin-bottom:0.75rem;">{w_obj['scientificName']}</div>
 
-                  <div style="background:var(--surface-2);border-radius:10px;padding:0.7rem;border:1px solid var(--line);margin-bottom:0.7rem;">
+                  <div style="background:var(--surface-2);border-radius:8px;padding:0.75rem;border:1px solid var(--line);margin-bottom:0.75rem;">
                     <div style="display:flex;justify-content:space-between;padding:0.25rem 0;border-bottom:1px solid var(--line);font-size:0.8rem;">
-                      <span style="color:var(--muted);">Suitability Score:</span>
+                      <span style="color:var(--muted);">Suitability Index:</span>
                       <strong style="color:var(--good);">{w_score:.1f} / 100</strong>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:0.25rem 0;border-bottom:1px solid var(--line);font-size:0.8rem;">
@@ -817,13 +831,13 @@ def render_recommendations_modal(furniture_id: str):
                       <strong>Tier {w_obj['costTier']} / 5</strong>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:0.25rem 0;font-size:0.8rem;">
-                      <span style="color:var(--muted);">India Availability:</span>
+                      <span style="color:var(--muted);">Regional Availability:</span>
                       <strong>{w_obj['availabilityInIndia']} / 10</strong>
                     </div>
                   </div>
 
-                  <div style="font-size:0.78rem;color:var(--ink);line-height:1.45;background:var(--surface);padding:0.6rem 0.8rem;border-radius:8px;border:1px solid var(--line);">
-                    <strong style="color:var(--amber);">Joinery Note:</strong> {w_obj['joineryTip']}
+                  <div style="font-size:0.78rem;color:var(--ink);line-height:1.45;background:var(--surface-2);padding:0.6rem 0.8rem;border-radius:8px;border:1px solid var(--line);">
+                    <strong style="color:var(--ink);">Joinery Tip:</strong> {w_obj['joineryTip']}
                   </div>
                 </div>
                 """), unsafe_allow_html=True)
@@ -1136,15 +1150,15 @@ def render_furniture_page(dark: bool = False):
     active_obj = furniture_recommender.get_furniture_item(st.session_state["selected_furniture"])
     sp_act = active_obj["stress_profile"]
     st.markdown(uhtml(f"""
-    <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:8px;padding:0.75rem 1.1rem;margin:1rem 0 1.2rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.6rem;">
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0.85rem 1.25rem;margin:1rem 0 1.2rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
       <div style="display:flex;align-items:center;gap:0.75rem;">
         <div>
-          <div style="font-size:0.95rem;font-weight:800;color:var(--ink);">{active_obj['name']} <span style="font-size:0.75rem;font-weight:600;color:var(--muted);background:var(--surface);padding:0.15rem 0.5rem;border-radius:4px;border:1px solid var(--line);">{active_obj['category']}</span></div>
-          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.15rem;">Min MOR: <strong style="color:var(--good);">{sp_act['min_mor']}</strong> &bull; Density: <strong>{sp_act['density_range']}</strong> &bull; Cut: <strong>{sp_act['recommended_cut']}</strong></div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ink);">{active_obj['name']} <span style="font-size:0.72rem;font-weight:600;color:var(--muted);background:var(--surface-2);padding:0.18rem 0.55rem;border-radius:4px;border:1px solid var(--line);text-transform:uppercase;letter-spacing:0.04em;">{active_obj['category']}</span></div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem;">Min MOR: <strong style="color:var(--ink);">{sp_act['min_mor']}</strong> &bull; Bulk Density: <strong style="color:var(--ink);">{sp_act['density_range']}</strong> &bull; Cut: <strong style="color:var(--ink);">{sp_act['recommended_cut']}</strong></div>
         </div>
       </div>
-      <div style="font-size:0.8rem;color:var(--amber);font-weight:700;">
-        Select any piece below to view top 5 recommended species and blueprints.
+      <div style="font-size:0.78rem;color:var(--muted);font-weight:500;">
+        Click any piece below to launch the dedicated Joinery &amp; Timber Studio.
       </div>
     </div>
     """), unsafe_allow_html=True)
@@ -1155,7 +1169,7 @@ def render_furniture_page(dark: bool = False):
     st.markdown(uhtml(f"""
     <div class="wi-card-header" style="margin-top:0.5rem;margin-bottom:0.8rem;display:flex;justify-content:space-between;align-items:center;">
       <span class="wi-card-title">Browse Furniture Gallery</span>
-      <span class="wi-section-label" style="background:var(--surface-2);color:var(--amber);padding:0.25rem 0.75rem;border-radius:4px;border:1px solid var(--line);font-size:0.75rem;font-weight:700;">
+      <span class="wi-section-label" style="background:var(--surface-2);color:var(--ink);padding:0.25rem 0.75rem;border-radius:4px;border:1px solid var(--line);font-size:0.75rem;font-weight:600;">
         Showing {len(filtered_keys)} of {total_catalog_count} Pieces
       </span>
     </div>
@@ -1168,14 +1182,14 @@ def render_furniture_page(dark: bool = False):
         is_active = (f_key == st.session_state["selected_furniture"])
 
         with col_slot:
-            border_color = "var(--amber)" if is_active else "var(--line)"
+            border_color = "var(--good)" if is_active else "var(--line)"
             bg_color = "var(--surface-2)" if is_active else "var(--surface)"
-            shadow_style = "0 4px 14px rgba(217,143,43,0.18)" if is_active else "0 1px 4px rgba(0,0,0,0.04)"
-            active_badge = '<div style="position:absolute;top:8px;right:8px;background:var(--amber);color:var(--on-amber);font-size:0.62rem;font-weight:800;padding:0.22rem 0.55rem;border-radius:4px;z-index:3;box-shadow:0 1px 4px rgba(0,0,0,0.2);">ACTIVE</div>' if is_active else ''
+            shadow_style = "0 3px 12px rgba(0,0,0,0.06)" if is_active else "0 1px 4px rgba(0,0,0,0.02)"
+            active_badge = '<div style="position:absolute;top:8px;right:8px;background:var(--good);color:var(--on-amber);font-size:0.60rem;font-weight:700;padding:0.18rem 0.5rem;border-radius:4px;z-index:3;letter-spacing:0.04em;">ACTIVE</div>' if is_active else ''
 
             # Card Header Title Box
             st.markdown(uhtml(f'''
-            <div style="position:relative;border:1.5px solid {border_color};border-radius:8px;background:{bg_color};
+            <div style="position:relative;border:1px solid {border_color};border-radius:8px;background:{bg_color};
                         padding:10px 10px 6px 10px;margin-bottom:6px;box-shadow:{shadow_style};transition:all 0.2s ease;">
               {active_badge}
               <div style="font-weight:700;font-size:0.88rem;color:var(--ink);margin-bottom:2px;line-height:1.3;text-align:center;">
