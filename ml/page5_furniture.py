@@ -486,18 +486,18 @@ def render_recommendations_modal(furniture_id: str):
         top_act_col1, top_act_col2 = st.columns([1.8, 1])
         with top_act_col1:
             if st.button(
-                f"✨ Create Clean Design Pictures for All {len(furniture_patterns)} Patterns (1-Click)",
+                f"✨ Generate Multi-View Design Suites for All {len(furniture_patterns)} Patterns (1-Click)",
                 key=f"btn_create_all_designs_{active_item['id']}_{explored_wood_id}",
                 use_container_width=True
             ):
-                with st.spinner(f"Generating clean architectural visuals for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
+                with st.spinner(f"Generating 4-perspective HD design suites for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
                     for idx_all, p_all in enumerate(furniture_patterns):
-                        design_visualizer.generate_furniture_design_image(active_item, p_all, explored_wood)
+                        design_visualizer.generate_multi_design_suite(active_item, p_all, explored_wood)
                         st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = True
                     st.rerun()
         with top_act_col2:
             if st.button(
-                "✕ Hide All Pictures",
+                "✕ Hide All Design Suites",
                 key=f"btn_hide_all_designs_{active_item['id']}_{explored_wood_id}",
                 use_container_width=True
             ):
@@ -556,36 +556,35 @@ def render_recommendations_modal(furniture_id: str):
             """), unsafe_allow_html=True)
 
             # Check design visual status
-            design_img_path = design_visualizer.get_design_image_path(active_item["id"], pat["title"], explored_wood_id)
             design_state_key = f"show_design_{active_item['id']}_{explored_wood_id}_{p_idx}"
-            is_design_active = st.session_state.get(design_state_key, False) or os.path.exists(design_img_path)
+            suite_exists = design_visualizer.is_suite_generated(active_item["id"], pat["title"], explored_wood_id)
+            is_design_active = st.session_state.get(design_state_key, False) or suite_exists
 
             if not is_design_active:
                 act_c1, act_c2 = st.columns([1.8, 1])
                 with act_c1:
                     if st.button(
-                        f"✨ Create Design Picture for {pat['title']}",
+                        f"✨ Generate Multi-View Design Suite (4 High-Res Views)",
                         key=f"btn_create_design_{active_item['id']}_{explored_wood_id}_{p_idx}",
                         use_container_width=True,
                         type="primary"
                     ):
-                        with st.spinner(f"Generating architectural design visual for {pat['title']} in {explored_wood['name']}..."):
-                            design_visualizer.generate_furniture_design_image(active_item, pat, explored_wood, force_regenerate=True)
+                        with st.spinner(f"Generating 4 architectural perspectives for {pat['title']} in {explored_wood['name']}..."):
+                            design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
                             st.session_state[design_state_key] = True
                             st.rerun()
                 with act_c2:
-                    st.caption("📐 Generates a clean CAD architectural specification picture with authentic timber grain.")
+                    st.caption("🎨 Creates 4 HD perspectives: 3D Studio Render, CAD Blueprint, Joinery Schematic & In-Situ Scene.")
             else:
-                # Ensure image file exists
-                if not os.path.exists(design_img_path):
-                    design_visualizer.generate_furniture_design_image(active_item, pat, explored_wood)
+                # Ensure all 4 images in suite are generated
+                design_suite = design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood)
 
                 st.markdown(uhtml(f"""
                 <div style="background:var(--surface-2);border:1.5px solid var(--amber);border-radius:10px;padding:0.75rem 1rem;margin:0.4rem 0 0.5rem 0;">
                   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;">
                     <div>
                       <span style="font-size:0.75rem;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:0.06em;">
-                        📐 Clean Architectural Design Picture &amp; CAD Specification
+                        🎨 Multi-Perspective Architectural &amp; Studio Design Suite
                       </span>
                       <div style="font-size:0.95rem;font-weight:700;color:var(--ink);">
                         {pat['title']} · Crafted in {explored_wood['name']}
@@ -593,41 +592,75 @@ def render_recommendations_modal(furniture_id: str):
                     </div>
                     <div>
                       <span style="background:var(--good);color:white;font-size:0.72rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:4px;">
-                        ✓ High-Res Visual Ready
+                        ✓ 4 High-Res Perspectives Ready
                       </span>
                     </div>
                   </div>
                 </div>
                 """), unsafe_allow_html=True)
 
-                if os.path.exists(design_img_path):
-                    st.image(
-                        design_img_path,
-                        caption=f"Architectural CAD Specification: {pat['title']} ({active_item['name']}) crafted in {explored_wood['name']}",
-                        use_container_width=True
-                    )
+                tab_studio, tab_blueprint, tab_joinery, tab_insitu = st.tabs([
+                    "📸 3D Studio Render",
+                    "📐 CAD Blueprint",
+                    "🔍 Joinery Schematic",
+                    "🏡 In-Situ Room Context"
+                ])
 
-                    # Controls row: Download, Regenerate, Close/Hide
-                    ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([1.5, 1.2, 1])
-                    with ctrl_col1:
-                        with open(design_img_path, "rb") as f_img:
-                            st.download_button(
-                                label="📥 Download Clean Picture (PNG)",
-                                data=f_img.read(),
-                                file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}.png",
-                                mime="image/png",
-                                key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}",
+                views_mapping = [
+                    (tab_studio, "studio", design_suite.get("studio")),
+                    (tab_blueprint, "blueprint", design_suite.get("blueprint")),
+                    (tab_joinery, "joinery", design_suite.get("joinery")),
+                    (tab_insitu, "insitu", design_suite.get("insitu")),
+                ]
+
+                for v_tab, v_key, v_info in views_mapping:
+                    if not v_info:
+                        continue
+                    with v_tab:
+                        st.markdown(uhtml(f"""
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:0.3rem 0 0.5rem 0;padding:0.4rem 0.7rem;background:var(--surface);border-radius:6px;border:1px solid var(--line);">
+                          <div>
+                            <strong style="color:var(--ink);font-size:0.86rem;">{v_info['icon']} {v_info['title']}</strong>
+                            <span style="color:var(--muted);font-size:0.75rem;margin-left:0.5rem;">— {v_info['desc']}</span>
+                          </div>
+                          <div>
+                            <span style="background:var(--amber-soft);color:var(--amber);font-size:0.68rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:3px;border:1px solid var(--amber);">
+                              {v_info['badge']}
+                            </span>
+                          </div>
+                        </div>
+                        """), unsafe_allow_html=True)
+
+                        if os.path.exists(v_info["path"]):
+                            st.image(
+                                v_info["path"],
+                                caption=f"{v_info['title']}: {pat['title']} ({active_item['name']}) in {explored_wood['name']}",
                                 use_container_width=True
                             )
-                    with ctrl_col2:
-                        if st.button("🔄 Re-Create Picture", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
-                            with st.spinner("Re-generating clean design picture..."):
-                                design_visualizer.generate_furniture_design_image(active_item, pat, explored_wood, force_regenerate=True)
-                                st.rerun()
-                    with ctrl_col3:
-                        if st.button("✕ Close Picture", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
-                            st.session_state[design_state_key] = False
+
+                            v_btn_col1, v_btn_col2 = st.columns([1.5, 1])
+                            with v_btn_col1:
+                                with open(v_info["path"], "rb") as f_img:
+                                    st.download_button(
+                                        label=f"📥 Download {v_info['title']} (PNG)",
+                                        data=f_img.read(),
+                                        file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_{v_key}.png",
+                                        mime="image/png",
+                                        key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_{v_key}",
+                                        use_container_width=True
+                                    )
+
+                # Controls row: Re-generate all, Close/Hide
+                ctrl_col1, ctrl_col2 = st.columns([1.2, 1])
+                with ctrl_col1:
+                    if st.button("🔄 Re-Generate All 4 Perspectives", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
+                        with st.spinner("Re-generating all 4 design perspectives in HD..."):
+                            design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
                             st.rerun()
+                with ctrl_col2:
+                    if st.button("✕ Close Multi-View Suite", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
+                        st.session_state[design_state_key] = False
+                        st.rerun()
 
             st.markdown("<div style='margin-bottom:1.2rem;'></div>", unsafe_allow_html=True)
 
