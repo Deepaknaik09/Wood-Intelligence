@@ -1012,7 +1012,7 @@ def render_inspection_report(R, key_prefix="report"):
             pdf = make_pdf_report(payload, R["abytes"])
             st.download_button("Download Formal PDF Report", pdf,
                                file_name=f"{os.path.splitext(R['aname'])[0]}_timber_report.pdf", mime="application/pdf",
-                               key=f"{key_prefix}_pdf", use_container_width=True)
+                               key=f"{key_prefix}_pdf", width="stretch")
         except Exception as e:
             st.warning(f"PDF error: {e}")
     else:
@@ -1086,7 +1086,7 @@ with head_c1:
         text-shadow: none !important;
     }
     </style>""", unsafe_allow_html=True)
-    with st.popover("Menu", use_container_width=True, help="Navigation Menu"):
+    with st.popover("Menu", width="stretch", help="Navigation Menu"):
         st.markdown(uhtml("""
         <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.05rem;color:var(--ink);margin-bottom:0.4rem;padding-bottom:0.3rem;border-bottom:1px solid var(--line);">
           INSPECTION MODULES
@@ -1094,7 +1094,7 @@ with head_c1:
         """), unsafe_allow_html=True)
         for page_name, icon, short_label in NAV_OPTIONS:
             is_active = (st.session_state["current_page"] == page_name)
-            if st.button(f"{icon}  {short_label}", key=f"nav_pop_{page_name}", use_container_width=True, type="primary" if is_active else "secondary"):
+            if st.button(f"{icon}  {short_label}", key=f"nav_pop_{page_name}", width="stretch", type="primary" if is_active else "secondary"):
                 st.session_state["current_page"] = page_name
                 st.rerun()
 
@@ -2186,7 +2186,7 @@ if st.session_state["current_page"] == "Home":
     # Action Buttons under Subtitle
     b1, b_fill = st.columns([3.2, 8.8])
     with b1:
-        if st.button("Launch Timber Inspection Suite", key="home_btn_analysis", type="primary", use_container_width=True):
+        if st.button("Launch Timber Inspection Suite", key="home_btn_analysis", type="primary", width="stretch"):
             st.session_state["current_page"] = "New Analysis"
             st.rerun()
 
@@ -2395,7 +2395,7 @@ elif st.session_state["current_page"] == "Overview":
             .configure_view(strokeWidth=0, fill="transparent")
             .configure(background="transparent")
         )
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width="stretch")
         st.caption("Aggregated defect occurrences detected across test batches.")
     
     with c_stat:
@@ -2494,9 +2494,9 @@ elif st.session_state["current_page"] == "New Analysis":
     else:
         pv1, pv2 = st.columns([5, 3], gap="large")
         with pv1:
-            st.image(Image.open(io.BytesIO(abytes)), caption=f"Specimen Preview: {aname}", use_container_width=True)
+            st.image(Image.open(io.BytesIO(abytes)), caption=f"Specimen Preview: {aname}", width="stretch")
         with pv2:
-            run_det = st.button("Execute Complete Timber Inspection", type="primary", use_container_width=True)
+            run_det = st.button("Execute Complete Timber Inspection", type="primary", width="stretch")
             st.caption("Performs species classification, authenticity gating, and defect segmentation.")
 
             if run_det:
@@ -2679,13 +2679,13 @@ elif st.session_state["current_page"] == "Defect Detection":
             img_c1, img_c2 = st.columns(2, gap="medium")
             with img_c1:
                 st.caption("📸 Original Timber Board")
-                st.image(R["orig_rgb"], use_container_width=True)
+                st.image(R["orig_rgb"], width="stretch")
             with img_c2:
                 st.caption("🔍 Defect-Segmented Map")
-                st.image(R["seg"] if R["seg"] is not None else R["orig_rgb"], use_container_width=True)
+                st.image(R["seg"] if R["seg"] is not None else R["orig_rgb"], width="stretch")
         else:
             show = {"Defect Segmentation Overlay": R["seg"], "Bounding Boxes Only": R["box"], "Original Timber Only": R["orig_rgb"]}[vmode]
-            st.image(show if show is not None else R["orig_rgb"], use_container_width=True)
+            st.image(show if show is not None else R["orig_rgb"], width="stretch")
 
         if R["seg"] is not None:
             buf = io.BytesIO()
@@ -2782,7 +2782,7 @@ elif st.session_state["current_page"] == "Compare Wood":
         pr_b = st.selectbox("Preset Wood B:", preset_names, index=3, key="sel_pr_b_new")
     with cp3:
         st.markdown("<div style='height:1.75rem'></div>", unsafe_allow_html=True)
-        if st.button("Apply Presets", key="btn_apply_presets_new", use_container_width=True):
+        if st.button("Apply Presets", key="btn_apply_presets_new", width="stretch"):
             s_map = {s["name"]: s["file"] for s in SAMPLES}
             st.session_state["cmp_a_sample"] = s_map.get(pr_a)
             st.session_state["cmp_b_sample"] = s_map.get(pr_b)
@@ -2861,7 +2861,7 @@ elif st.session_state["current_page"] == "Compare Wood":
                 for res, col, lbl in [(ra, ca2, "Wood A"), (rb, cb2, "Wood B")]:
                     with col:
                         img_to_show = res["seg"] if res.get("seg") is not None else res["pil"]
-                        st.image(img_to_show, caption=f"{lbl}: {res['name']}", use_container_width=True)
+                        st.image(img_to_show, caption=f"{lbl}: {res['name']}", width="stretch")
                 if ra["is_w"] and rb["is_w"]:
                     winner = (ra if ra["fr"]["score"] >= rb["fr"]["score"] else rb)
                     loser = (rb if winner == ra else ra)
@@ -2958,9 +2958,9 @@ elif st.session_state["current_page"] == "Analysis History":
         btn_d1, btn_d2 = st.columns([2, 1])
         with btn_d1:
             st.download_button("💾 Download History Audit (JSON)", json.dumps(history, indent=2).encode(),
-                               file_name="timber_analysis_history.json", mime="application/json", use_container_width=True)
+                               file_name="timber_analysis_history.json", mime="application/json", width="stretch")
         with btn_d2:
-            if st.button("🗑️ Clear History Records", type="secondary", use_container_width=True):
+            if st.button("🗑️ Clear History Records", type="secondary", width="stretch"):
                 if os.path.exists(HISTORY_FILE):
                     os.remove(HISTORY_FILE)
                 st.success("History records cleared.")
