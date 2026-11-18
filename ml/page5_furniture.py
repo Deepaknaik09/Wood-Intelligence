@@ -19,6 +19,8 @@ from woods_data import WOODS_DATABASE, WOODS_BY_ID
 import scoring_engine
 import furniture_recommender
 import design_visualizer
+import importlib
+importlib.reload(design_visualizer)
 
 def uhtml(s: str) -> str:
     """Returns an unindented single-line string with no blank lines so Streamlit does not turn it into a code block."""
@@ -298,13 +300,21 @@ def render_recommendations_modal(furniture_id: str):
     if "compare_woods" not in st.session_state:
         st.session_state["compare_woods"] = []
 
-    # 4 Comprehensive Studio Tabs
-    tab_woods, tab_patterns, tab_compare, tab_rules = st.tabs([
+    # 4 Comprehensive Studio Tabs with Persistent State Tracking
+    tab_labels = [
         f"Top 5 Recommended Species ({active_item['name']})",
         f"Design Patterns & Blueprints ({active_item['name']})",
-        f"Comparative Analysis ({len(st.session_state['compare_woods'])})",
+        "Comparative Analysis Matrix",
         "Fabrication Guidelines"
-    ])
+    ]
+    studio_tabs_key = f"studio_tabs_{active_item['id']}"
+    if st.session_state.get(studio_tabs_key) not in tab_labels:
+        st.session_state[studio_tabs_key] = tab_labels[0]
+
+    tab_woods, tab_patterns, tab_compare, tab_rules = st.tabs(
+        tab_labels,
+        key=studio_tabs_key
+    )
 
     # -----------------------------------------------------------------------
     # TAB 1: TOP 5 RECOMMENDED WOODS
@@ -428,6 +438,7 @@ def render_recommendations_modal(furniture_id: str):
             with act_col2:
                 if st.button(f"Explore Blueprints for {wood['name']}", key=f"dlg_btn_explore_{wood['id']}_{w_idx}", use_container_width=True):
                     st.session_state["selected_wood_for_explorer"] = wood["id"]
+                    st.session_state[studio_tabs_key] = tab_labels[1]
                     st.rerun()
 
     # -----------------------------------------------------------------------
@@ -492,8 +503,9 @@ def render_recommendations_modal(furniture_id: str):
             ):
                 with st.spinner(f"Generating 4-perspective HD design suites for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
                     for idx_all, p_all in enumerate(furniture_patterns):
-                        design_visualizer.generate_multi_design_suite(active_item, p_all, explored_wood)
+                        design_visualizer.generate_multi_design_suite(active_item, p_all, explored_wood, force_regenerate=True)
                         st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = True
+                    st.session_state[studio_tabs_key] = tab_labels[1]
                     st.rerun()
         with top_act_col2:
             if st.button(
@@ -503,6 +515,7 @@ def render_recommendations_modal(furniture_id: str):
             ):
                 for idx_all in range(len(furniture_patterns)):
                     st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = False
+                st.session_state[studio_tabs_key] = tab_labels[1]
                 st.rerun()
 
         for p_idx, pat in enumerate(furniture_patterns):
@@ -558,7 +571,9 @@ def render_recommendations_modal(furniture_id: str):
             # Check design visual status
             design_state_key = f"show_design_{active_item['id']}_{explored_wood_id}_{p_idx}"
             suite_exists = design_visualizer.is_suite_generated(active_item["id"], pat["title"], explored_wood_id)
-            is_design_active = st.session_state.get(design_state_key, False) or suite_exists
+            if design_state_key not in st.session_state:
+                st.session_state[design_state_key] = suite_exists
+            is_design_active = st.session_state.get(design_state_key, False)
 
             if not is_design_active:
                 act_c1, act_c2 = st.columns([1.8, 1])
@@ -572,10 +587,12 @@ def render_recommendations_modal(furniture_id: str):
                         with st.spinner(f"Generating 4 architectural perspectives for {pat['title']} in {explored_wood['name']}..."):
                             design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
                             st.session_state[design_state_key] = True
-                            st.rerun()
+                            st.session_state[studio_tabs_key] = tab_labels[1]
+                            is_design_active = True
                 with act_c2:
                     st.caption("🎨 Creates 4 HD perspectives: 3D Studio Render, CAD Blueprint, Joinery Schematic & In-Situ Scene.")
-            else:
+
+            if is_design_active:
                 # Ensure all 4 images in suite are generated
                 design_suite = design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood)
 
@@ -656,10 +673,13 @@ def render_recommendations_modal(furniture_id: str):
                     if st.button("🔄 Re-Generate All 4 Perspectives", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
                         with st.spinner("Re-generating all 4 design perspectives in HD..."):
                             design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
+                            st.session_state[design_state_key] = True
+                            st.session_state[studio_tabs_key] = tab_labels[1]
                             st.rerun()
                 with ctrl_col2:
                     if st.button("✕ Close Multi-View Suite", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
                         st.session_state[design_state_key] = False
+                        st.session_state[studio_tabs_key] = tab_labels[1]
                         st.rerun()
 
             st.markdown("<div style='margin-bottom:1.2rem;'></div>", unsafe_allow_html=True)

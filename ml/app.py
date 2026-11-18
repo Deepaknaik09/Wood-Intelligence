@@ -2726,7 +2726,9 @@ elif st.session_state["current_page"] == "Defect Detection":
 # PAGE 5: FURNITURE RECOMMENDATIONS (DEDICATED PAGE)
 # ===========================================================================
 elif st.session_state["current_page"] == "Furniture Recommendations":
+    import importlib
     import page5_furniture
+    importlib.reload(page5_furniture)
     page5_furniture.render_furniture_page(dark)
     active_item = furniture_recommender.get_furniture_item(st.session_state.get("selected_furniture", "wooden_chair"))
     # -----------------------------------------------------------------------
