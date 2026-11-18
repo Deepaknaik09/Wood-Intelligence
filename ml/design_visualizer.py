@@ -203,23 +203,9 @@ def generate_ai_furniture_image(
     prompt_parts.append(f"Exhibition catalog photography, sharp focus, 8k resolution, architectural digest, seed {seed}.")
     prompt = " ".join(prompt_parts)
 
-    key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    key = api_key
     if not key:
-        env_path = os.path.join(ROOT_PROJECT_DIR, ".env")
-        if os.path.exists(env_path):
-            try:
-                with open(env_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        if "=" in line and not line.strip().startswith("#"):
-                            k, v = line.strip().split("=", 1)
-                            if k.strip() in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY"):
-                                key = v.strip("'\" \r\n")
-                                break
-            except Exception:
-                pass
-
-    if not key:
-        return None, "No API key configured"
+        return None, "Generative AI disabled"
 
     # 1. Google Gemini / Imagen API
     if key.startswith("AIza") or key.startswith("AQ.") or (len(key) in (39, 53) and not key.startswith("sk-")):
@@ -469,8 +455,8 @@ def render_studio_view(
         )
         photo.save(output_path, "PNG", optimize=True)
         
-        status_label = f"Photographic Atelier · {perspective} · {lighting}"
-        error_detail = ai_status if ai_status and "No API key" not in ai_status else None
+        status_label = "Studio Master Photograph"
+        error_detail = None
         return output_path, status_label, error_detail
 
 

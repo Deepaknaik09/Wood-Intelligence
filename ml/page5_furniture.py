@@ -487,137 +487,40 @@ def render_recommendations_modal(furniture_id: str):
         """), unsafe_allow_html=True)
 
         st.markdown(uhtml(f"""
-        <div style="margin:1rem 0 0.6rem 0;">
-          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;letter-spacing:-0.02em;">Architectural Design Patterns &amp; Visualization Studio</h4>
-          <p style="font-size:0.82rem;color:var(--muted);margin:0;">
-            Customize camera angles, studio illumination, and timber finishes to render tailored visualizations for solid {explored_wood['name']}.
+        <div style="margin:1rem 0 0.8rem 0;">
+          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;letter-spacing:-0.02em;">Architectural Design Patterns &amp; Studio Showcase</h4>
+          <p style="font-size:0.84rem;color:var(--muted);margin:0;">
+            Explore curated architectural patterns, structural joinery specifications, and authentic master timber studio photographs crafted in solid {explored_wood['name']}.
           </p>
         </div>
         """), unsafe_allow_html=True)
 
-        # Interactive Architectural Studio Image Generation Controls
-        st.markdown(uhtml(f"""
-        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0.9rem 1.2rem;margin-bottom:0.9rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-          <div style="font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">
-            Studio Visualization Options
-          </div>
-        </div>
-        """), unsafe_allow_html=True)
-
-        opt_c1, opt_c2, opt_c3, opt_c4 = st.columns([1.2, 1.2, 1.2, 1.0])
-        with opt_c1:
-            sel_perspective = st.selectbox(
-                "Camera Perspective",
-                ["Hero Three-Quarter", "Front Elevation", "Side Profile", "Macro Grain & Joinery"],
-                key=f"opt_persp_{active_item['id']}_{explored_wood_id}"
-            )
-        with opt_c2:
-            sel_lighting = st.selectbox(
-                "Studio Lighting",
-                ["4500K Neutral Studio", "Warm Nordic Sunlight", "Dramatic High-Contrast", "Clean High-Key"],
-                key=f"opt_light_{active_item['id']}_{explored_wood_id}"
-            )
-        with opt_c3:
-            sel_finish = st.selectbox(
-                "Timber Finish Sheen",
-                ["Natural Hardwax Oil", "Deep Amber Danish Oil", "Satin Polyurethane", "Raw Sawn Sanded"],
-                key=f"opt_finish_{active_item['id']}_{explored_wood_id}"
-            )
-        with opt_c4:
-            sel_variation = st.selectbox(
-                "Design Variation",
-                ["Variation 1", "Variation 2", "Variation 3", "Variation 4"],
-                key=f"opt_var_{active_item['id']}_{explored_wood_id}"
-            )
-        sel_seed = int(sel_variation.split()[-1])
-
-        custom_prompt_val = st.text_input(
-            "Creative Architectural Styling Directive (Optional Generative AI input):",
-            placeholder="e.g. Include woven cane Danish cord seat, brushed brass joinery pins, live-edge slab...",
-            key=f"opt_prompt_{active_item['id']}_{explored_wood_id}"
-        )
-
-        # AI Generative Engine Key Configuration & Persistence
-        active_ai_key = st.session_state.get("ai_image_api_key", os.environ.get("GEMINI_API_KEY", os.environ.get("GOOGLE_API_KEY", os.environ.get("OPENAI_API_KEY", ""))))
-        if not active_ai_key:
-            env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-            if os.path.exists(env_path):
-                try:
-                    with open(env_path, "r", encoding="utf-8") as f_env:
-                        for l_env in f_env:
-                            for k_cand in ("GEMINI_API_KEY=", "GOOGLE_API_KEY=", "OPENAI_API_KEY="):
-                                if l_env.strip().startswith(k_cand):
-                                    active_ai_key = l_env.strip().split("=", 1)[1].strip("'\" \r\n")
-                                    st.session_state["ai_image_api_key"] = active_ai_key
-                                    break
-                except Exception:
-                    pass
-
-        has_ai_key = bool(active_ai_key and len(active_ai_key) > 8)
-        is_gemini = active_ai_key.startswith("AIza") or active_ai_key.startswith("AQ.") or len(active_ai_key) in (39, 53)
-        ai_provider = "Google AI Studio (Gemini)" if is_gemini else ("OpenAI Image API" if active_ai_key.startswith("sk-") else "Cloud Generative AI")
-
-        with st.expander(
-            f"Visualizer Studio Engine: {'Generative AI Active (' + ai_provider + ')' if has_ai_key else 'Studio Master Photography (Add API Key for Generative AI)'}",
-            expanded=False
-        ):
-            if has_ai_key:
-                st.success(f"✓ **Connected to {ai_provider}**. Live generation calls this model directly using your prompt and selected options.")
-            else:
-                st.info("💡 **Connect a Google Gemini (Imagen 3) or OpenAI API Key** below for live AI generation. Tip: Google AI Studio gives 100% free API keys with daily quota at **aistudio.google.com/app/apikey**.")
-
-            col_k1, col_k2, col_k3 = st.columns([2.5, 1, 1])
-            with col_k1:
-                key_input_val = st.text_input(
-                    "API Key (Google Gemini AI Studio 'AIza...' or OpenAI 'sk-...'):",
-                    value=active_ai_key,
-                    type="password",
-                    key="input_furniture_ai_key",
-                    help="Get a free Gemini API key at aistudio.google.com/app/apikey"
-                )
-            with col_k2:
-                st.write("")
-                st.write("")
-                if st.button("Save Key", key="btn_save_ai_key", width="stretch"):
-                    st.session_state["ai_image_api_key"] = key_input_val.strip()
-                    try:
-                        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-                        is_g_input = key_input_val.strip().startswith("AIza") or key_input_val.strip().startswith("AQ.") or len(key_input_val.strip()) in (39, 53)
-                        env_key_name = "GEMINI_API_KEY" if is_g_input else "OPENAI_API_KEY"
-                        with open(env_path, "a", encoding="utf-8") as f_app:
-                            f_app.write(f"\n{env_key_name}={key_input_val.strip()}\n")
-                    except Exception:
-                        pass
-                    st.toast("AI API Key saved successfully!", icon="✅")
-                    st.rerun()
-            with col_k3:
-                st.write("")
-                st.write("")
-                if st.button("Remove Key", key="btn_clear_ai_key", width="stretch"):
-                    st.session_state["ai_image_api_key"] = ""
-                    st.rerun()
+        # Standard Studio Presentation Settings
+        sel_perspective = "Hero Three-Quarter"
+        sel_lighting = "4500K Neutral Studio"
+        sel_finish = "Natural Hardwax Oil"
+        sel_seed = 1
+        custom_prompt_val = ""
+        active_ai_key = ""
 
         furniture_patterns = furniture_recommender.get_furniture_design_patterns(active_item["id"], explored_wood_id)
 
-        # Master Action Toolbar to generate all design pictures at once
+        # Master Action Toolbar to view all design studio photographs at once
         top_act_col1, top_act_col2 = st.columns([1.8, 1])
         with top_act_col1:
             if st.button(
-                f"Generate Studio Visualizations for All {len(furniture_patterns)} Patterns",
+                f"Show Studio Visualizations for All {len(furniture_patterns)} Patterns",
                 key=f"btn_create_all_designs_{active_item['id']}_{explored_wood_id}",
                 width="stretch"
             ):
-                with st.spinner(f"Generating tailored designs for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
+                with st.spinner(f"Loading studio designs for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
                     for idx_all, p_all in enumerate(furniture_patterns):
                         design_visualizer.generate_multi_design_suite(
                             active_item, p_all, explored_wood,
-                            force_regenerate=True,
                             pattern_index=idx_all,
-                            api_key=st.session_state.get("ai_image_api_key", active_ai_key),
                             perspective=sel_perspective,
                             lighting=sel_lighting,
                             finish=sel_finish,
-                            custom_prompt=custom_prompt_val,
                             seed=sel_seed
                         )
                         st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = True
@@ -688,73 +591,63 @@ def render_recommendations_modal(furniture_id: str):
                 act_c1, act_c2 = st.columns([1.8, 1])
                 with act_c1:
                     if st.button(
-                        f"Generate Studio Visualization",
+                        f"View Studio Photograph",
                         key=f"btn_create_design_{active_item['id']}_{explored_wood_id}_{p_idx}",
                         width="stretch",
                         type="primary"
                     ):
-                        with st.spinner(f"Rendering visualization for {pat['title']} in {explored_wood['name']}..."):
+                        with st.spinner(f"Loading studio photograph for {pat['title']} in {explored_wood['name']}..."):
                             design_visualizer.generate_multi_design_suite(
                                 active_item, pat, explored_wood,
-                                force_regenerate=True,
                                 pattern_index=p_idx,
-                                api_key=st.session_state.get("ai_image_api_key", active_ai_key),
                                 perspective=sel_perspective,
                                 lighting=sel_lighting,
                                 finish=sel_finish,
-                                custom_prompt=custom_prompt_val,
                                 seed=sel_seed
                             )
                             st.session_state[design_state_key] = True
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             is_design_active = True
                 with act_c2:
-                    st.caption(f"Generates visual tailored to {sel_perspective} & {sel_lighting}.")
+                    st.caption(f"Architectural studio photographic specification in solid {explored_wood['name']}.")
 
             if is_design_active:
                 # Ensure design suite is generated
                 design_suite = design_visualizer.generate_multi_design_suite(
                     active_item, pat, explored_wood,
                     pattern_index=p_idx,
-                    api_key=st.session_state.get("ai_image_api_key", active_ai_key),
                     perspective=sel_perspective,
                     lighting=sel_lighting,
                     finish=sel_finish,
-                    custom_prompt=custom_prompt_val,
                     seed=sel_seed
                 )
 
                 studio_info = design_suite["studio"]
-                status_badge = studio_info.get("status", "Studio Master Render")
 
                 st.markdown(uhtml(f"""
                 <div style="display:flex;justify-content:space-between;align-items:center;margin:0.75rem 0 0.35rem 0;padding:0 0.2rem;">
                   <span style="font-size:0.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">
-                    Architectural Studio Render · Solid {explored_wood['name']}
+                    Architectural Studio Master · Solid {explored_wood['name']}
                   </span>
                   <span style="font-size:0.72rem;color:var(--good);font-weight:600;background:var(--surface-2);padding:0.18rem 0.6rem;border-radius:4px;border:1px solid var(--line);">
-                    {status_badge}
+                    Studio Master Photograph
                   </span>
                 </div>
                 """), unsafe_allow_html=True)
-
-                # If quota error occurred during live AI generation, show a helpful explanatory alert
-                if studio_info.get("error"):
-                    st.warning(f"⚠️ **Live AI Notice**: {studio_info['error']}")
 
                 # DISPLAY THE HIGH-RESOLUTION MASTER REALISTIC IMAGE
                 if os.path.exists(studio_info["path"]):
                     st.image(
                         studio_info["path"],
-                        caption=f"{pat['title']} ({active_item['name']}) · {sel_perspective} · {sel_lighting} · Solid {explored_wood['name']}",
+                        caption=f"{pat['title']} ({active_item['name']}) crafted in Solid {explored_wood['name']}",
                         width="stretch"
                     )
 
-                    btn_c1, btn_c2, btn_c3 = st.columns([1.6, 1.2, 1])
+                    btn_c1, btn_c2 = st.columns([1.6, 1])
                     with btn_c1:
                         with open(studio_info["path"], "rb") as f_img:
                             st.download_button(
-                                label=f"Download Master Render",
+                                label=f"Download Studio Photograph",
                                 data=f_img.read(),
                                 file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_master.png",
                                 mime="image/png",
@@ -763,26 +656,7 @@ def render_recommendations_modal(furniture_id: str):
                                 type="primary"
                             )
                     with btn_c2:
-                        if st.button("Regenerate Variation", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
-                            with st.spinner("Regenerating visual variation..."):
-                                # Cycle the seed to ensure a new variation
-                                next_seed = sel_seed + 1
-                                design_visualizer.generate_multi_design_suite(
-                                    active_item, pat, explored_wood,
-                                    force_regenerate=True,
-                                    pattern_index=p_idx,
-                                    api_key=st.session_state.get("ai_image_api_key", active_ai_key),
-                                    perspective=sel_perspective,
-                                    lighting=sel_lighting,
-                                    finish=sel_finish,
-                                    custom_prompt=custom_prompt_val,
-                                    seed=next_seed
-                                )
-                                st.session_state[design_state_key] = True
-                                st.session_state[studio_tabs_key] = tab_labels[1]
-                                st.rerun()
-                    with btn_c3:
-                        if st.button("Close Visualization", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
+                        if st.button("Close View", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
                             st.session_state[design_state_key] = False
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             st.rerun()
