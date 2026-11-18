@@ -59,29 +59,59 @@ def run_scan():
     at.run()
     check("Defect Detection View (No Specimen Guard)", not at.exception, "Handled empty specimen state gracefully without crashing")
 
-    # 7. Page 5: Furniture Recommendations Studio
+    # 7. Page 5: Furniture Recommendations Studio Gallery
     at.session_state["current_page"] = "Furniture Recommendations"
     at.run()
     furn_inspect_btns = [b.key for b in at.button if b.key and b.key.startswith("btn_act_")]
     check("Furniture Recommendations Gallery", len(furn_inspect_btns) > 0, f"Rendered {len(furn_inspect_btns)} interactive furniture pieces")
 
-    # 8. Page 6: Compare Wood
+    # 8. Furniture Studio Modal Mount & DOM Inspection
+    at.session_state["selected_furniture"] = "cot"
+    at.session_state["active_modal"] = "cot"
+    at.run()
+    check("Furniture Studio Modal DOM Mount", not at.exception, "Modal dialog mounted without exceptions")
+
+    # 9. Modal Tab 1: Top 5 Recommended Species
+    modal_explore_btns = [b.key for b in at.button if b.key and b.key.startswith("dlg_btn_explore_")]
+    check("Modal Tab 1 (Top 5 Species)", len(modal_explore_btns) == 5, f"Rendered all 5 recommended species action buttons ({len(modal_explore_btns)}/5)")
+
+    # 10. Tab Navigation: Explore Blueprints Button Click
+    if modal_explore_btns:
+        at.button(key=modal_explore_btns[0]).click().run()
+        active_tab = at.session_state.get("studio_tabs_cot")
+        check("Tab Navigation (Explore Blueprints Click)", active_tab == "Design Patterns & Blueprints (Cot)", f"Successfully navigated to Tab 2: '{active_tab}'")
+
+    # 11. Modal Tab 2: Design Patterns & Multi-View Suite
+    design_download_btns = [db.key for db in at.download_button if db.key and db.key.startswith("dl_btn_cot_")]
+    check("Multi-View Design Suite DOM Render", len(design_download_btns) >= 4, f"Mounted {len(design_download_btns)} high-res download buttons across design views")
+
+    # 12. Modal Tab 3: Comparative Analysis Matrix
+    at.session_state["studio_tabs_cot"] = "Comparative Analysis Matrix"
+    at.run()
+    check("Modal Tab 3 (Comparative Analysis)", not at.exception, "Comparative analysis matrix mounted cleanly")
+
+    # 13. Modal Tab 4: Fabrication Guidelines
+    at.session_state["studio_tabs_cot"] = "Fabrication Guidelines"
+    at.run()
+    check("Modal Tab 4 (Fabrication Guidelines)", not at.exception, "Workshop fabrication guidelines mounted cleanly")
+
+    # 14. Page 6: Compare Wood
     at.session_state["current_page"] = "Compare Wood"
     at.run()
     presets_btn = [b for b in at.button if b.key == "btn_apply_presets_new"]
     check("Compare Wood Studio", len(presets_btn) == 1, "Preset button and selector controls mounted")
 
-    # 9. Page 7: Analysis History
+    # 15. Page 7: Analysis History
     at.session_state["current_page"] = "Analysis History"
     at.run()
     check("Analysis History View", not at.exception, "Rendered audit records and historical logs")
 
-    # 10. Page 8: Reports
+    # 16. Page 8: Reports
     at.session_state["current_page"] = "Reports"
     at.run()
     check("Official Reports View", not at.exception, "Rendered formal inspection certificate engine")
 
-    # 11. Page 9: Settings
+    # 17. Page 9: Settings
     at.session_state["current_page"] = "Settings"
     at.run()
     check("Settings Diagnostic Controls", len(at.slider) >= 2 and len(at.radio) >= 1, f"{len(at.slider)} sliders (Defect Conf, Gate) and optimization radio buttons operational")

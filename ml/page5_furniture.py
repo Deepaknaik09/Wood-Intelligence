@@ -241,7 +241,7 @@ def render_recommendations_modal(furniture_id: str):
                       text-transform:uppercase;">Selected Woodwork Piece</div>
         </div>'''), unsafe_allow_html=True)
         if os.path.exists(active_item["image"]):
-            st.image(active_item["image"], use_container_width=True)
+            st.image(active_item["image"], width="stretch")
         else:
             st.markdown(f'<div style="font-size:2rem;text-align:center;padding:2rem 0;font-weight:700;color:var(--amber);">{active_item["name"]}</div>', unsafe_allow_html=True)
 
@@ -436,7 +436,7 @@ def render_recommendations_modal(furniture_id: str):
                     st.rerun()
 
             with act_col2:
-                if st.button(f"Explore Blueprints for {wood['name']}", key=f"dlg_btn_explore_{wood['id']}_{w_idx}", use_container_width=True):
+                if st.button(f"Explore Blueprints for {wood['name']}", key=f"dlg_btn_explore_{wood['id']}_{w_idx}", width="stretch"):
                     st.session_state["selected_wood_for_explorer"] = wood["id"]
                     st.session_state[studio_tabs_key] = tab_labels[1]
                     st.rerun()
@@ -499,7 +499,7 @@ def render_recommendations_modal(furniture_id: str):
             if st.button(
                 f"✨ Generate Multi-View Design Suites for All {len(furniture_patterns)} Patterns (1-Click)",
                 key=f"btn_create_all_designs_{active_item['id']}_{explored_wood_id}",
-                use_container_width=True
+                width="stretch"
             ):
                 with st.spinner(f"Generating 4-perspective HD design suites for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
                     for idx_all, p_all in enumerate(furniture_patterns):
@@ -511,7 +511,7 @@ def render_recommendations_modal(furniture_id: str):
             if st.button(
                 "✕ Hide All Design Suites",
                 key=f"btn_hide_all_designs_{active_item['id']}_{explored_wood_id}",
-                use_container_width=True
+                width="stretch"
             ):
                 for idx_all in range(len(furniture_patterns)):
                     st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = False
@@ -581,7 +581,7 @@ def render_recommendations_modal(furniture_id: str):
                     if st.button(
                         f"✨ Generate Multi-View Design Suite (4 High-Res Views)",
                         key=f"btn_create_design_{active_item['id']}_{explored_wood_id}_{p_idx}",
-                        use_container_width=True,
+                        width="stretch",
                         type="primary"
                     ):
                         with st.spinner(f"Generating 4 architectural perspectives for {pat['title']} in {explored_wood['name']}..."):
@@ -652,7 +652,7 @@ def render_recommendations_modal(furniture_id: str):
                             st.image(
                                 v_info["path"],
                                 caption=f"{v_info['title']}: {pat['title']} ({active_item['name']}) in {explored_wood['name']}",
-                                use_container_width=True
+                                width="stretch"
                             )
 
                             v_btn_col1, v_btn_col2 = st.columns([1.5, 1])
@@ -664,20 +664,20 @@ def render_recommendations_modal(furniture_id: str):
                                         file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_{v_key}.png",
                                         mime="image/png",
                                         key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_{v_key}",
-                                        use_container_width=True
+                                        width="stretch"
                                     )
 
                 # Controls row: Re-generate all, Close/Hide
                 ctrl_col1, ctrl_col2 = st.columns([1.2, 1])
                 with ctrl_col1:
-                    if st.button("🔄 Re-Generate All 4 Perspectives", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
+                    if st.button("🔄 Re-Generate All 4 Perspectives", key=f"regen_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
                         with st.spinner("Re-generating all 4 design perspectives in HD..."):
                             design_visualizer.generate_multi_design_suite(active_item, pat, explored_wood, force_regenerate=True)
                             st.session_state[design_state_key] = True
                             st.session_state[studio_tabs_key] = tab_labels[1]
                             st.rerun()
                 with ctrl_col2:
-                    if st.button("✕ Close Multi-View Suite", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", use_container_width=True):
+                    if st.button("✕ Close Multi-View Suite", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
                         st.session_state[design_state_key] = False
                         st.session_state[studio_tabs_key] = tab_labels[1]
                         st.rerun()
@@ -810,7 +810,7 @@ def render_recommendations_modal(furniture_id: str):
     # BOTTOM CLOSE BUTTON
     # -----------------------------------------------------------------------
     st.markdown("<hr style='margin:1.1rem 0 0.9rem 0;border:none;border-bottom:1px solid var(--line);'>", unsafe_allow_html=True)
-    if st.button("Close Studio & Return to Gallery", key="dlg_btn_close_modal_bottom", use_container_width=True, type="secondary"):
+    if st.button("Close Studio & Return to Gallery", key="dlg_btn_close_modal_bottom", width="stretch", type="secondary"):
         st.session_state["active_modal"] = None
         st.rerun()
 
@@ -1067,12 +1067,12 @@ def render_furniture_page(dark: bool = False):
             st.rerun()
 
     with dropdown_col2:
-        if st.button("Sample Piece", key="btn_furn_random", use_container_width=True, help="Explore another catalog piece"):
+        if st.button("Sample Piece", key="btn_furn_random", width="stretch", help="Explore another catalog piece"):
             st.session_state["selected_furniture"] = random.choice(filtered_keys)
             st.rerun()
 
     with dropdown_col3:
-        if st.button("Open Studio", key="btn_open_active_studio", type="primary", use_container_width=True, help="Open recommendations studio for selected piece"):
+        if st.button("Open Studio", key="btn_open_active_studio", type="primary", width="stretch", help="Open recommendations studio for selected piece"):
             st.session_state["active_modal"] = st.session_state["selected_furniture"]
             st.rerun()
 
@@ -1136,7 +1136,7 @@ def render_furniture_page(dark: bool = False):
             # Furniture Photo
             img_path = f_item["image"]
             if os.path.exists(img_path):
-                st.image(img_path, use_container_width=True)
+                st.image(img_path, width="stretch")
             else:
                 st.markdown(f'<div style="font-size:1.5rem;font-weight:700;color:var(--muted);text-align:center;padding:1.4rem 0;background:var(--surface-2);border-radius:8px;">{f_item["name"]}</div>', unsafe_allow_html=True)
 
@@ -1149,7 +1149,7 @@ def render_furniture_page(dark: bool = False):
             # Visible Action Button right below the image
             btn_label = f"Inspect {f_item['name']}"
             btn_type = "primary" if is_active else "secondary"
-            if st.button(btn_label, key=f"btn_act_{f_key}", type=btn_type, use_container_width=True):
+            if st.button(btn_label, key=f"btn_act_{f_key}", type=btn_type, width="stretch"):
                 st.session_state["selected_furniture"] = f_key
                 st.session_state["active_modal"] = f_key
                 st.rerun()
