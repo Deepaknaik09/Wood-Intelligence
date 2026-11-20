@@ -23,6 +23,7 @@ from PIL import Image, ImageFilter, ImageEnhance
 import predict
 import wood_gate
 import furniture_recommender
+import mandi_price_service
 
 try:
     import plotly
@@ -2718,6 +2719,96 @@ elif st.session_state["current_page"] == "Defect Detection":
                 """), unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
+        # Mandi APMC Market Price Valuation & Forecasting Card
+        dims = R.get("dims", {"l": 1200, "w": 150, "t": 25})
+        vol_m3 = (dims.get("l", 1000) * dims.get("w", 150) * dims.get("t", 25)) / 1e9
+        vol_cft = vol_m3 * 35.3147
+
+        usbl_pct = R.get("usbl", 85)
+        if usbl_pct >= 85:
+            spec_grade = "Select Structural"
+        elif usbl_pct >= 70:
+            spec_grade = "No. 1"
+        elif usbl_pct >= 55:
+            spec_grade = "No. 2"
+        else:
+            spec_grade = "Reject"
+
+        sp_key = (top_sp.get("name", "European Beech") if top_sp else "beech").lower().replace(" ", "_")
+        if "beech" in sp_key:
+            sp_key = "beech"
+        elif "teak" in sp_key:
+            sp_key = "teak"
+        elif "walnut" in sp_key:
+            sp_key = "black_walnut"
+        elif "oak" in sp_key:
+            sp_key = "white_oak"
+        elif "sal" in sp_key:
+            sp_key = "sal"
+
+        mandi_st = st.session_state.get("mandi_state", "Karnataka")
+        val_data = mandi_price_service.calculate_timber_value(sp_key, vol_cft, spec_grade, state=mandi_st)
+        forecast_data = mandi_price_service.predict_future_trends(sp_key, months_ahead=6)
+        api_health = mandi_price_service.check_mandi_health()
+        conn_badge = "🟢 Mandi API v1 Online" if api_health.get("status") == "connected" else "🟠 Offline Benchmark Active"
+        prem_color = "var(--good)" if val_data['quality_premium_percent'] >= 0 else "var(--bad)"
+        prem_sign = "+" if val_data['quality_premium_percent'] >= 0 else ""
+
+        fc_html = "".join([f"""<div style="flex:1;min-width:90px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:0.5rem;text-align:center;">
+          <div style="font-size:0.68rem;color:var(--muted);">{fc['period']}</div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--ink);margin:2px 0;">₹{fc['projected_rate_cft']:,.0f}</div>
+          <div style="font-size:0.65rem;color:var(--good);font-weight:600;">+{fc['change_pct']}%</div>
+        </div>""" for fc in forecast_data])
+
+        st.markdown(uhtml(f"""
+        <div class="wi-card" style="margin-top:1.2rem;border-left:4px solid var(--amber);">
+          <div class="wi-card-header">
+            <div>
+              <span class="wi-card-title">📈 Mandi APMC Market Price Valuation &amp; Forecast</span>
+              <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">Real-time timber commodity benchmarking · ASTM D245 quality retention adjusted</div>
+            </div>
+            <span class="wi-section-label" style="background:var(--surface-2);color:var(--ink);">{conn_badge}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:0.75rem;margin:1rem 0;">
+            <div style="background:var(--surface-2);padding:0.9rem 1.1rem;border-radius:10px;border:1px solid var(--line);">
+              <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Estimated Specimen Value</div>
+              <div style="font-size:1.65rem;font-weight:800;color:var(--ink);font-family:'JetBrains Mono',monospace;margin-top:3px;">
+                ₹{val_data['total_estimated_value']:,.2f}
+              </div>
+              <div style="font-size:0.72rem;color:var(--muted);">Volume: {vol_cft:.3f} cft ({vol_m3:.4f} m³)</div>
+            </div>
+
+            <div style="background:var(--surface-2);padding:0.9rem 1.1rem;border-radius:10px;border:1px solid var(--line);">
+              <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Quality-Adjusted Rate</div>
+              <div style="font-size:1.65rem;font-weight:800;color:var(--amber);font-family:'JetBrains Mono',monospace;margin-top:3px;">
+                ₹{val_data['effective_rate_cft']:,.1f} <span style="font-size:0.8rem;color:var(--muted);">/ cft</span>
+              </div>
+              <div style="font-size:0.72rem;color:var(--muted);">₹{val_data['effective_rate_cum']:,.0f} / m³ (Regional: {mandi_st})</div>
+            </div>
+
+            <div style="background:var(--surface-2);padding:0.9rem 1.1rem;border-radius:10px;border:1px solid var(--line);">
+              <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">ASTM Grade Factor</div>
+              <div style="font-size:1.45rem;font-weight:800;color:var(--ink);margin-top:3px;">
+                {spec_grade}
+              </div>
+              <div style="font-size:0.72rem;color:{prem_color};font-weight:600;">
+                {prem_sign}{val_data['quality_premium_percent']}% retention premium
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:0.85rem;padding-top:0.75rem;border-top:1px solid var(--line);">
+            <div style="font-size:0.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:0.5rem;">
+              📅 6-Month Projected Mandi Price Trajectory ({sp_data.get('common_name', 'Timber')})
+            </div>
+            <div style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:0.3rem;">
+              {fc_html}
+            </div>
+          </div>
+        </div>
+        """), unsafe_allow_html=True)
+
         st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
         render_inspection_report(R, key_prefix="defect_report")
 
@@ -3019,5 +3110,39 @@ elif st.session_state["current_page"] == "Settings":
           <div style="color:var(--good);font-weight:700;">✓ Hardware Status: CPU Acceleration Active</div>
         </div>
         """), unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ── Mandi APMC Market & Price Prediction Configuration ───────────────────
+    st.markdown('<div class="wi-card" style="margin-top:1.2rem;"><div class="wi-card-header"><span class="wi-card-title">📈 Mandi APMC Market &amp; Price Prediction API</span><span class="wi-section-label">COMMODITY PRICING</span></div>', unsafe_allow_html=True)
+    m1, m2 = st.columns(2, gap="large")
+    with m1:
+        st.markdown("#### 🔑 API Key &amp; APMC State")
+        st.caption("Base URL: `https://mandi-api.onrender.com/v1`")
+        curr_key = mandi_price_service.get_api_key()
+        new_key = st.text_input("Mandi API Key", value=curr_key, type="password", placeholder="Paste your Mandi API key here...", help="Enter your Mandi API key for live price prediction and high rate limits.")
+        if new_key != curr_key:
+            mandi_price_service.set_api_key(new_key)
+            st.success("API Key updated and saved to .env!")
+
+        selected_state = st.selectbox("Primary APMC State:", list(mandi_price_service.REGIONAL_FACTORS.keys()), index=0)
+        st.session_state["mandi_state"] = selected_state
+
+    with m2:
+        st.markdown("#### 🌐 Service Connectivity")
+        health = mandi_price_service.check_mandi_health()
+        if health.get("status") == "connected":
+            st.success(f"🟢 Connected to {health.get('service', 'Mandi API')} (v1)")
+            st.caption("Available endpoints: `/v1/states`, `/v1/commodities`, `/v1/markets`, `/v1/prices`, `/v1/prices/history`")
+        else:
+            st.warning("⚠️ Mandi API is currently offline or rate-limited. Offline fallback active.")
+
+        if st.button("🔄 Test API Connection", key="btn_test_mandi_api"):
+            with st.spinner("Pinging Mandi API..."):
+                h_res = mandi_price_service.check_mandi_health()
+                if h_res.get("status") == "connected":
+                    st.success(f"API reachable! Latency: ~{h_res.get('latency_ms', 100)} ms")
+                else:
+                    st.error(f"Connection failed: {h_res.get('error')}")
 
     st.markdown("</div>", unsafe_allow_html=True)
