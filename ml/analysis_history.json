@@ -1,5 +1,33 @@
 [
   {
+    "timestamp": "2026-11-19 13:49:32",
+    "filename": "images (1).jpg",
+    "wood_score": 0.733,
+    "is_wood": true,
+    "damaged_pct": 0.2,
+    "usable_pct": 99.23,
+    "waste_pct": 0.77,
+    "severity": "Medium",
+    "defect_count": 1,
+    "best_furniture": "Shelf",
+    "best_score": 90,
+    "species": "Norway spruce (Picea abies)"
+  },
+  {
+    "timestamp": "2026-11-19 13:47:56",
+    "filename": "images (1).jpg",
+    "wood_score": 0.733,
+    "is_wood": true,
+    "damaged_pct": 0.2,
+    "usable_pct": 99.23,
+    "waste_pct": 0.77,
+    "severity": "Medium",
+    "defect_count": 1,
+    "best_furniture": "Shelf",
+    "best_score": 90,
+    "species": "Norway spruce (Picea abies)"
+  },
+  {
     "timestamp": "2026-11-17 15:16:08",
     "filename": "wood_species_sample_grid.png",
     "wood_score": 0.298,

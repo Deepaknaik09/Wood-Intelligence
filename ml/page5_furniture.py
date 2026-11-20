@@ -18,9 +18,6 @@ from furniture_data import FURNITURE_DATA, FURNITURE_BY_ID, get_all_furniture, g
 from woods_data import WOODS_DATABASE, WOODS_BY_ID
 import scoring_engine
 import furniture_recommender
-import design_visualizer
-import importlib
-importlib.reload(design_visualizer)
 
 def uhtml(s: str) -> str:
     """Returns an unindented single-line string with no blank lines so Streamlit does not turn it into a code block."""
@@ -300,10 +297,9 @@ def render_recommendations_modal(furniture_id: str):
     if "compare_woods" not in st.session_state:
         st.session_state["compare_woods"] = []
 
-    # 4 Comprehensive Studio Tabs with Persistent State Tracking
+    # 3 Comprehensive Studio Tabs with Persistent State Tracking
     tab_labels = [
         f"Top 5 Recommended Species ({active_item['name']})",
-        f"Design Patterns & Blueprints ({active_item['name']})",
         "Comparative Analysis Matrix",
         "Fabrication Guidelines"
     ]
@@ -311,7 +307,7 @@ def render_recommendations_modal(furniture_id: str):
     if st.session_state.get(studio_tabs_key) not in tab_labels:
         st.session_state[studio_tabs_key] = tab_labels[0]
 
-    tab_woods, tab_patterns, tab_compare, tab_rules = st.tabs(
+    tab_woods, tab_compare, tab_rules = st.tabs(
         tab_labels,
         key=studio_tabs_key
     )
@@ -443,228 +439,15 @@ def render_recommendations_modal(furniture_id: str):
                     st.rerun()
 
             with act_col2:
-                if st.button(f"Explore Blueprints for {wood['name']}", key=f"dlg_btn_explore_{wood['id']}_{w_idx}", width="stretch"):
-                    st.session_state["selected_wood_for_explorer"] = wood["id"]
+                if st.button(f"View in Comparison Matrix", key=f"dlg_btn_matrix_{wood['id']}_{w_idx}", width="stretch"):
+                    if wood["id"] not in st.session_state["compare_woods"]:
+                        if len(st.session_state["compare_woods"]) < 3:
+                            st.session_state["compare_woods"].append(wood["id"])
                     st.session_state[studio_tabs_key] = tab_labels[1]
                     st.rerun()
 
     # -----------------------------------------------------------------------
-    # TAB 2: DEDICATED DESIGN PATTERNS FOR THIS FURNITURE PIECE
-    # -----------------------------------------------------------------------
-    with tab_patterns:
-        explored_wood_id = st.session_state.get("selected_wood_for_explorer", top_5_woods[0]["wood"]["id"])
-        explored_wood = scoring_engine.WOODS_BY_ID.get(explored_wood_id, top_5_woods[0]["wood"])
-
-        exp_w_names = [w["name"] for w in scoring_engine.WOODS_DATABASE]
-        exp_w_ids = [w["id"] for w in scoring_engine.WOODS_DATABASE]
-        sel_w_name = st.selectbox(
-            f"Select Active Crafting Timber:",
-            exp_w_names,
-            index=exp_w_ids.index(explored_wood_id) if explored_wood_id in exp_w_ids else 0,
-            key="dlg_pattern_wood_select"
-        )
-        new_exp_id = exp_w_ids[exp_w_names.index(sel_w_name)]
-        if new_exp_id != explored_wood_id:
-            st.session_state["selected_wood_for_explorer"] = new_exp_id
-            st.rerun()
-
-        st.markdown(uhtml(f"""
-        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem 1.3rem;margin:0.85rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-          <div>
-            <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Active Timber Specification</div>
-            <div style="font-size:1.35rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;">{explored_wood['name']} <span style="font-size:0.9rem;font-weight:400;color:var(--muted);font-style:italic;">({explored_wood['scientificName']})</span></div>
-            <div style="font-size:0.8rem;color:var(--muted);margin-top:0.2rem;">{explored_wood['joineryTip']}</div>
-          </div>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-            <span style="background:var(--surface-2);border:1px solid var(--line);color:var(--ink);font-size:0.75rem;font-weight:600;padding:0.35rem 0.75rem;border-radius:6px;">
-              Density: {explored_wood['density']} kg/m³
-            </span>
-            <span style="background:var(--surface-2);border:1px solid var(--line);color:var(--ink);font-size:0.75rem;font-weight:600;padding:0.35rem 0.75rem;border-radius:6px;">
-              Hardness: {explored_wood['hardness']} N
-            </span>
-          </div>
-        </div>
-        """), unsafe_allow_html=True)
-
-        st.markdown(uhtml(f"""
-        <div style="margin:1rem 0 0.8rem 0;">
-          <h4 style="color:var(--ink);margin:0 0 0.2rem 0;letter-spacing:-0.02em;">Architectural Design Patterns &amp; Studio Showcase</h4>
-          <p style="font-size:0.84rem;color:var(--muted);margin:0;">
-            Explore curated architectural patterns, structural joinery specifications, and authentic master timber studio photographs crafted in solid {explored_wood['name']}.
-          </p>
-        </div>
-        """), unsafe_allow_html=True)
-
-        # Standard Studio Presentation Settings
-        sel_perspective = "Hero Three-Quarter"
-        sel_lighting = "4500K Neutral Studio"
-        sel_finish = "Natural Hardwax Oil"
-        sel_seed = 1
-        custom_prompt_val = ""
-        active_ai_key = ""
-
-        furniture_patterns = furniture_recommender.get_furniture_design_patterns(active_item["id"], explored_wood_id)
-
-        # Master Action Toolbar to view all design studio photographs at once
-        top_act_col1, top_act_col2 = st.columns([1.8, 1])
-        with top_act_col1:
-            if st.button(
-                f"Show Studio Visualizations for All {len(furniture_patterns)} Patterns",
-                key=f"btn_create_all_designs_{active_item['id']}_{explored_wood_id}",
-                width="stretch"
-            ):
-                with st.spinner(f"Loading studio designs for all {len(furniture_patterns)} patterns in {explored_wood['name']}..."):
-                    for idx_all, p_all in enumerate(furniture_patterns):
-                        design_visualizer.generate_multi_design_suite(
-                            active_item, p_all, explored_wood,
-                            pattern_index=idx_all,
-                            perspective=sel_perspective,
-                            lighting=sel_lighting,
-                            finish=sel_finish,
-                            seed=sel_seed
-                        )
-                        st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = True
-                    st.session_state[studio_tabs_key] = tab_labels[1]
-                    st.rerun()
-        with top_act_col2:
-            if st.button(
-                "Hide All Visualizations",
-                key=f"btn_hide_all_designs_{active_item['id']}_{explored_wood_id}",
-                width="stretch"
-            ):
-                for idx_all in range(len(furniture_patterns)):
-                    st.session_state[f"show_design_{active_item['id']}_{explored_wood_id}_{idx_all}"] = False
-                st.session_state[studio_tabs_key] = tab_labels[1]
-                st.rerun()
-
-        for p_idx, pat in enumerate(furniture_patterns):
-            st.markdown(uhtml(f"""
-            <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.6rem;margin-bottom:1.25rem;box-shadow:0 3px 12px rgba(0,0,0,0.03);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.85rem;">
-                <div>
-                  <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
-                    <span style="font-size:1.35rem;font-weight:700;color:var(--ink);letter-spacing:-0.02em;">{pat['title']}</span>
-                    <span style="background:var(--surface-2);color:var(--ink);border:1px solid var(--line);font-size:0.68rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:4px;letter-spacing:0.05em;text-transform:uppercase;">{pat['badge']}</span>
-                  </div>
-                  <p style="font-size:0.85rem;color:var(--muted);margin:0.35rem 0 0 0;line-height:1.55;">
-                    {pat['description']}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Minimalist Architectural Spec Grid -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:0.75rem;margin:0.85rem 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0.9rem 1.1rem;">
-                <div>
-                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Proportions</div>
-                  <div style="font-size:0.88rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['dimensions']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Joinery System</div>
-                  <div style="font-size:0.88rem;font-weight:700;color:var(--good);margin-top:0.15rem;">{pat['recommended_joinery']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Surface Finish</div>
-                  <div style="font-size:0.88rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['recommended_finish']}</div>
-                </div>
-                <div>
-                  <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Dynamic Rating</div>
-                  <div style="font-size:0.88rem;font-weight:700;color:var(--ink);margin-top:0.15rem;">{pat['load_capacity']}</div>
-                </div>
-              </div>
-
-              <!-- Editorial Timber & Workshop Insights -->
-              <div style="margin-top:0.75rem;padding-top:0.65rem;border-top:1px solid var(--line);font-size:0.82rem;color:var(--ink);line-height:1.55;">
-                <div><strong>Engineering Compatibility:</strong> {pat['wood_pairing_note']}</div>
-                <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem;"><strong>Fabrication Guideline:</strong> {pat['blueprint_tips']}</div>
-              </div>
-            </div>
-            """), unsafe_allow_html=True)
-
-            # Check design visual status
-            design_state_key = f"show_design_{active_item['id']}_{explored_wood_id}_{p_idx}"
-            suite_exists = design_visualizer.is_suite_generated(active_item["id"], pat["title"], explored_wood_id)
-            if design_state_key not in st.session_state:
-                st.session_state[design_state_key] = suite_exists
-            is_design_active = st.session_state.get(design_state_key, False)
-
-            if not is_design_active:
-                act_c1, act_c2 = st.columns([1.8, 1])
-                with act_c1:
-                    if st.button(
-                        f"View Studio Photograph",
-                        key=f"btn_create_design_{active_item['id']}_{explored_wood_id}_{p_idx}",
-                        width="stretch",
-                        type="primary"
-                    ):
-                        with st.spinner(f"Loading studio photograph for {pat['title']} in {explored_wood['name']}..."):
-                            design_visualizer.generate_multi_design_suite(
-                                active_item, pat, explored_wood,
-                                pattern_index=p_idx,
-                                perspective=sel_perspective,
-                                lighting=sel_lighting,
-                                finish=sel_finish,
-                                seed=sel_seed
-                            )
-                            st.session_state[design_state_key] = True
-                            st.session_state[studio_tabs_key] = tab_labels[1]
-                            is_design_active = True
-                with act_c2:
-                    st.caption(f"Architectural studio photographic specification in solid {explored_wood['name']}.")
-
-            if is_design_active:
-                # Ensure design suite is generated
-                design_suite = design_visualizer.generate_multi_design_suite(
-                    active_item, pat, explored_wood,
-                    pattern_index=p_idx,
-                    perspective=sel_perspective,
-                    lighting=sel_lighting,
-                    finish=sel_finish,
-                    seed=sel_seed
-                )
-
-                studio_info = design_suite["studio"]
-
-                st.markdown(uhtml(f"""
-                <div style="display:flex;justify-content:space-between;align-items:center;margin:0.75rem 0 0.35rem 0;padding:0 0.2rem;">
-                  <span style="font-size:0.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">
-                    Architectural Studio Master · Solid {explored_wood['name']}
-                  </span>
-                  <span style="font-size:0.72rem;color:var(--good);font-weight:600;background:var(--surface-2);padding:0.18rem 0.6rem;border-radius:4px;border:1px solid var(--line);">
-                    Studio Master Photograph
-                  </span>
-                </div>
-                """), unsafe_allow_html=True)
-
-                # DISPLAY THE HIGH-RESOLUTION MASTER REALISTIC IMAGE
-                if os.path.exists(studio_info["path"]):
-                    st.image(
-                        studio_info["path"],
-                        caption=f"{pat['title']} ({active_item['name']}) crafted in Solid {explored_wood['name']}",
-                        width="stretch"
-                    )
-
-                    btn_c1, btn_c2 = st.columns([1.6, 1])
-                    with btn_c1:
-                        with open(studio_info["path"], "rb") as f_img:
-                            st.download_button(
-                                label=f"Download Studio Photograph",
-                                data=f_img.read(),
-                                file_name=f"{active_item['id']}_{design_visualizer.slugify(pat['title'])}_{explored_wood_id}_master.png",
-                                mime="image/png",
-                                key=f"dl_btn_{active_item['id']}_{explored_wood_id}_{p_idx}_studio",
-                                width="stretch",
-                                type="primary"
-                            )
-                    with btn_c2:
-                        if st.button("Close View", key=f"hide_{active_item['id']}_{explored_wood_id}_{p_idx}", width="stretch"):
-                            st.session_state[design_state_key] = False
-                            st.session_state[studio_tabs_key] = tab_labels[1]
-                            st.rerun()
-
-            st.markdown("<div style='margin-bottom:1.2rem;'></div>", unsafe_allow_html=True)
-
-    # -----------------------------------------------------------------------
-    # TAB 3: SIDE-BY-SIDE TIMBER COMPARISON
+    # TAB 2: SIDE-BY-SIDE TIMBER COMPARISON
     # -----------------------------------------------------------------------
     with tab_compare:
         st.markdown(uhtml(f"""
@@ -754,7 +537,7 @@ def render_recommendations_modal(furniture_id: str):
                 """), unsafe_allow_html=True)
 
     # -----------------------------------------------------------------------
-    # TAB 4: WORKSHOP RULES & FABRICATION GUIDELINES
+    # TAB 3: WORKSHOP RULES & FABRICATION GUIDELINES
     # -----------------------------------------------------------------------
     with tab_rules:
         st.markdown(uhtml(f"""
