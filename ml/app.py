@@ -1033,7 +1033,8 @@ NAV_OPTIONS = [
     ("Compare Wood", "[06]", "Compare"),
     ("Analysis History", "[07]", "History"),
     ("Reports", "[08]", "Reports"),
-    ("Settings", "[09]", "Settings")
+    ("Settings", "[09]", "Settings"),
+    ("Market Prices", "[10]", "Market Prices")
 ]
 
 # Timber Atelier Masthead (Matches media_1793688954155_c8a2a591.jpg)
@@ -3146,3 +3147,11 @@ elif st.session_state["current_page"] == "Settings":
                     st.error(f"Connection failed: {h_res.get('error')}")
 
     st.markdown("</div>", unsafe_allow_html=True)
+
+
+# ===========================================================================
+# PAGE 10: LIVE WOOD MARKET PRICE & AI ESTIMATION
+# ===========================================================================
+elif st.session_state["current_page"] == "Market Prices":
+    import page10_market_prices
+    page10_market_prices.render_market_prices_page(dark)

@@ -32,7 +32,7 @@ def run_scan():
 
     # 2. Masthead Header Elements
     nav_buttons = [b.key for b in at.button if b.key and b.key.startswith("nav_pop_")]
-    check("Masthead Nav Menu DOM", len(nav_buttons) == 9, f"All 9 module navigation buttons present ({len(nav_buttons)}/9)")
+    check("Masthead Nav Menu DOM", len(nav_buttons) == 10, f"All 10 module navigation buttons present ({len(nav_buttons)}/10)")
 
     # 3. Page 1: Home Page Interactions
     at.session_state["current_page"] = "Home"
@@ -111,6 +111,11 @@ def run_scan():
     at.session_state["current_page"] = "Settings"
     at.run()
     check("Settings Diagnostic Controls", len(at.slider) >= 2 and len(at.radio) >= 1, f"{len(at.slider)} sliders (Defect Conf, Gate) and optimization radio buttons operational")
+
+    # 18. Page 10: Market Prices (Live Mandi + Random Forest AI Estimation)
+    at.session_state["current_page"] = "Market Prices"
+    at.run()
+    check("Live Wood Market Price & AI Estimation Page", not at.exception, "Rendered Mandi API Dashboard, Timber Guard, and Random Forest AI Estimation")
 
     print("\n=================================================================")
     print("                    AUDIT SUMMARY RESULTS                        ")
