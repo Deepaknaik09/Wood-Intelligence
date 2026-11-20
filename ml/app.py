@@ -2620,12 +2620,54 @@ elif st.session_state["current_page"] == "Defect Detection":
         if R["orig_rgb"] is not None:
             st.image(R["orig_rgb"], width=420)
     else:
-        # Species Box
+        # Precompute & Ensure Furniture Recommendations are Ready for this Specimen
         sp_data = R.get("sp_info", {})
         top_sp = R["sp"][0] if R.get("sp") else {}
         sp_conf = top_sp.get("confidence", 0.95) * 100
         # In a 19-class model, uniform random is 5.26%. >=50% is high, >=22% is solid relative majority (>4x uniform)
         sp_conf_color = "var(--good)" if sp_conf >= 50 else ("var(--warn)" if sp_conf >= 22 else "var(--bad)")
+
+        furn_res = R.get("furn_results") or []
+        if not furn_res:
+            dets_ = R.get("dets") or []
+            dmg_ = R.get("dmg", 0.0)
+            dims_ = R.get("dims") or {}
+            d_norm_ = {
+                "length": dims_.get("length") or (dims_.get("l", 1200) / 10 if dims_.get("l", 1200) > 300 else dims_.get("l", 120)),
+                "width": dims_.get("width") or (dims_.get("w", 300) / 10 if dims_.get("w", 300) > 100 else dims_.get("w", 30)),
+                "thickness": dims_.get("thickness") or (dims_.get("t", 25) / 10 if dims_.get("t", 25) > 10 else dims_.get("t", 2.5))
+            }
+            furn_res = []
+            for fk, fi in FURNITURE_CATALOG.items():
+                fr = evaluate_furniture(fi, sp_data, dets_, dmg_, d_norm_, st.session_state.get("rec_priority", "strength"))
+                fr.update({
+                    "id": fk, "name": fi["name"], "icon": fi["icon"], "full_name": fi["full_name"],
+                    "required_strength": fi["required_strength"],
+                    "acceptable_defects": fi["acceptable_defects"],
+                    "min_dimensions": fi["min_dimensions"],
+                    "dim_description": fi["dim_description"]
+                })
+                furn_res.append(fr)
+            furn_res.sort(key=lambda x: x["score"], reverse=True)
+            R["furn_results"] = furn_res
+
+        FURN_ICONS = {
+            "chair": "🪑", "table": "🪵", "desk": "💻", "shelf": "📚",
+            "door": "🚪", "bed": "🛏️", "cupboard": "🗄️"
+        }
+
+        best_f = furn_res[0] if furn_res else None
+        best_icon = FURN_ICONS.get(best_f["id"], "🪑") if best_f else "🪑"
+        best_badge_color = "var(--good)" if best_f and best_f["status"] == "SUITABLE" else ("var(--warn)" if best_f and best_f["status"] == "CONDITIONAL" else "var(--bad)")
+        best_badge_bg = "var(--good-tint)" if best_f and best_f["status"] == "SUITABLE" else ("var(--warn-tint)" if best_f and best_f["status"] == "CONDITIONAL" else "var(--bad-tint)")
+        best_badge_border = "var(--good-border)" if best_f and best_f["status"] == "SUITABLE" else ("var(--warn-border)" if best_f and best_f["status"] == "CONDITIONAL" else "var(--bad-border)")
+        best_badge_style = f"background:{best_badge_bg};color:{best_badge_color};border:1px solid {best_badge_border};font-weight:700;"
+
+        top_furn_html = f'''<div style="margin-top:0.75rem;padding-top:0.6rem;border-top:1px dashed var(--line);font-size:0.88rem;color:var(--ink);display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+          <span style="color:var(--amber);font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.04em;">★ Suggested Primary Furniture:</span>
+          <span style="font-weight:800;font-size:0.96rem;color:var(--ink);">{best_icon} {best_f['full_name']}</span>
+          <span style="font-size:0.75rem;padding:0.18rem 0.6rem;border-radius:6px;{best_badge_style}">{best_f['status']} · {best_f['score']}% Suitability</span>
+        </div>''' if best_f else ""
 
         cand_items = []
         for s_cand in (R.get("sp") or [])[:3]:
@@ -2643,6 +2685,7 @@ elif st.session_state["current_page"] == "Defect Detection":
               </div>
               <div style="font-size:0.95rem;color:var(--muted);margin-top:.35rem;">Type: <strong>{sp_data.get('type', 'Hardwood')}</strong> | Nominal Density: <strong>{sp_data.get('density', '680 kg/m³')}</strong></div>
               {cand_html}
+              {top_furn_html}
             </div>
             <div style="text-align:right;background:var(--surface-2);padding:0.6rem 1.15rem;border-radius:10px;border:1px solid var(--line);">
               <div style="font-size:.78rem;color:var(--muted);font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">Species Confidence</div>
